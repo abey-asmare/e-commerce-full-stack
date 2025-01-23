@@ -1,0 +1,21 @@
+.main-section{
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+  }
+ .Products-Just-For-You-div{
+ }
+ .Because-You-Picked-txt{
+    font-size: 18px;
+    text-decoration: underline;
+   margin-left: 75px;
+    color: #000;
+    margin-bottom: 10px;
+ }
+ .SeeMore{
+    font-size: 18px;
+    text-decoration: underline;
+   margin-left: 95px;
+    color: #000;
+ }

@@ -1,0 +1,6 @@
+{/* <Comment username={subcomments.username} key={index} id={subcomments.id} className="subcomment"></Comment> */}
+
+
+
+
+{/* <Comment id={comment.id} key={comment.id} username={comment.name} avatar={comment.avatar} likes={comment.likes} dislikes={comment.dislikes}></Comment> */}

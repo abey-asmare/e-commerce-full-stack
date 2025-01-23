@@ -1,0 +1,65 @@
+.main-card-div {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+  float: left;
+  margin-inline: 10px;
+
+
+}
+.Card-div {
+  width: 220px;
+  height: 120px;
+  margin-bottom: 270px;
+
+}
+.Card-img {
+  width: 230px;
+  height: 230px;
+}
+.label {
+  color: #9e3500;
+  display: inline;
+}
+.category {
+  color: #737373;
+}
+.colors {
+  color: #737373;
+}
+.price {
+  color: #9e3500;
+}
+.discountedPrice {
+  color: #117841;
+}
+.stockStatus {
+  color: #9e3500;
+}
+
+.card-side {
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.card-title {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.card-price {
+  margin-bottom: 5px;
+  font-size: 16px;
+  color: #333;
+}
+
+.card-colors {
+  font-size: 14px;
+  color: #666;
+}
+.discount {
+  color: #117841;
+}

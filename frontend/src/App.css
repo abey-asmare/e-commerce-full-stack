@@ -1,0 +1,18 @@
+.Card-div{
+    width: "100px";
+    height:"150px";
+  }
+  .Card-img{
+    display:"block";
+    width: "230px";
+    height:"230px"
+  }
+  .Card-p-JustIn{
+    color:"#9E3500";
+  }
+  .Card-p-mens{
+    color:"#737373";
+  }
+  .Card-p-numColor{
+    color:"#737373";
+  }
