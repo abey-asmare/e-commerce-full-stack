@@ -43,7 +43,8 @@ public class SeedDatabase {
     @Autowired
     private ProductSizeService productSizeService;
 
-
+// Todo: uncommenting the post construct annotation will help you to generate/populate all tables
+    // you can enable it until you run it 4 or 5 times and comment it.
 //    @PostConstruct
     public void seedDatabase() {
         if (userService.countUsers() == 0) {

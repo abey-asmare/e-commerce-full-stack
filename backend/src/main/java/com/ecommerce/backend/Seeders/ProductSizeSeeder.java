@@ -15,14 +15,14 @@ public class ProductSizeSeeder {
     private static final String[] SIZES = {"Sm", "Md", "Lg", "XL", "2XL"};
 
     public void seedProductSize(){
-//        for (String size : SIZES) {
-//            if(productSizeService.findBySize(size) == null){
-//                ProductSize p = new ProductSize();
-//                p.setSize(size);
-//                productSizeService.save(p);
-//            }
-//
-//        }
+        for (String size : SIZES) {
+            if(productSizeService.findBySize(size) == null){
+                ProductSize p = new ProductSize();
+                p.setSize(size);
+                productSizeService.save(p);
+            }
+
+        }
     }
 
 

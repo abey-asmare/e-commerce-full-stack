@@ -37,15 +37,15 @@ public class UserSeeder {
         // Seed ROLE_USER users
         // using userRepository just to have some flexibility to seed the data
         // instead of the userRegistreationDto.
-//        for (int i = 1; i <= 3; i++) {
-//            User user = new User();
-//            user.setFirstname("User" + i);
-//            user.setLastname("Test" + i);
-//            user.setEmail("user" + i + "@example.com");
-//            user.setPassword(passwordEncoder.encode("userpass"));
-//            user.setRole(roleUser);
-//            userRepository.save(user);
-//        }
+        for (int i = 1; i <= 3; i++) {
+            User user = new User();
+            user.setFirstname("User" + i);
+            user.setLastname("Test" + i);
+            user.setEmail("user" + i + "@example.com");
+            user.setPassword(passwordEncoder.encode("userpass"));
+            user.setRole(roleUser);
+            userRepository.save(user);
+        }
 
         // Seed ROLE_ADMIN user
         User admin = new User();
