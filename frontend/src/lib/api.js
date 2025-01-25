@@ -33,7 +33,12 @@ export const obj = [
     price: 109.99,
     discountedPrice: null,
     imageUrl: "/images/white-Tshirt.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -46,7 +51,12 @@ export const obj = [
     discount: false,
     discountedPrice: null,
     imageUrl: "/images/t-shirt.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -59,7 +69,12 @@ export const obj = [
     discount: true,
     discountedPrice: 15,
     imageUrl: "/images/t-shirt-black.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -71,7 +86,12 @@ export const obj = [
     price: 85.99,
     discountedPrice: 87.99,
     imageUrl: "/images/t-shirt-pink.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: "20% Off",
   },
   {
@@ -84,7 +104,12 @@ export const obj = [
     discount: true,
     discountedPrice: 20,
     imageUrl: "/images/t-shirt-black.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -97,7 +122,12 @@ export const obj = [
     discount: true,
     discountedPrice: 5,
     imageUrl: "/images/t-shirt-pink.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -109,7 +139,12 @@ export const obj = [
     price: 209.99,
     discountedPrice: null,
     imageUrl: "/images/white-Tshirt.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -121,7 +156,12 @@ export const obj = [
     price: 159.99,
     discountedPrice: null,
     imageUrl: "/images/white-Tshirt.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -134,7 +174,12 @@ export const obj = [
     discount: true,
     discountedPrice: 15,
     imageUrl: "/images/t-shirt-black.jpg",
-    subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
     stockStatus: null,
   },
   {
@@ -146,7 +191,12 @@ export const obj = [
     price: 199.99,
     discountedPrice: null,
     imageUrl: "/images/t-shirt-pink.jpg",
-  subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
   },
   {
     id: 11,
@@ -156,7 +206,12 @@ export const obj = [
     colors: 4,
     price: 109.99,
     imageUrl: "/images/t-shirt-black.jpg",
-  subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
   },
   {
     id: 12,
@@ -168,14 +223,33 @@ export const obj = [
     discount: true,
     discountedPrice: 5,
     imageUrl: "/images/white-Tshirt.jpg",
-  subImageUrls: ["/images/white-Tshirt.jpg", "/images/t-shirt.jpg", "/images/t-shirt-pink.jpg", "/images/t-shirt-black.jpg" ], 
+    subImageUrls: [
+      "/images/white-Tshirt.jpg",
+      "/images/t-shirt.jpg",
+      "/images/t-shirt-pink.jpg",
+      "/images/t-shirt-black.jpg",
+    ],
   },
 ];
 
-export async function getProducts() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(obj);
-    }, 3000);
-  });
+// export async function getProducts() {
+//   return new Promise((resolve) => {
+//     setTimeout(() => {
+//       resolve(obj);
+//     }, 3000);
+//   });
+// }
+export async function getProducts(page, limit = 12) {
+  return axios
+    .get(`http://localhost:8080/api/v1/products?page=${page}&size=${limit}`)
+    .then((response) => {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(response.data), 1000); // 1-second delay
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      throw err;
+    });
 }
+

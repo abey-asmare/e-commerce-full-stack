@@ -1,11 +1,15 @@
 package com.ecommerce.backend.Seeders;
 
 import com.ecommerce.backend.models.*;
+import com.ecommerce.backend.models.Color;
 import com.ecommerce.backend.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -17,12 +21,13 @@ public class ProductSeeder {
      public void seedProducts(List<User> users,
                                   List<Color> colors,
                                   List<ProductType> productTypes,
-                                  List<ProductSize> productSizes) {
+                                  List<ProductSize> productSizes
+                            ) {
 
         if (!users.isEmpty() &&
                 !colors.isEmpty() &&
                 !productTypes.isEmpty() &&
-                !productSizes.isEmpty() && productService.countProducts() <= 12) {
+                !productSizes.isEmpty() && productService.countProducts() <= 120) {
 
             User owner = users.stream()
                   .filter(User::isAdmin )

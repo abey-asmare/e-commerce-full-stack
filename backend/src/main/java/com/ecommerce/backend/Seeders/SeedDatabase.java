@@ -1,9 +1,12 @@
 package com.ecommerce.backend.Seeders;
 
+import com.ecommerce.backend.models.Product;
 import com.ecommerce.backend.services.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 
 @Component
@@ -37,6 +40,10 @@ public class SeedDatabase {
     @Autowired
     private ColorService colorService;
 
+        @Autowired
+    private ImageService productImageService;
+
+
     @Autowired
     private ProductTypeService productTypeService;
 
@@ -52,15 +59,16 @@ public class SeedDatabase {
             userSeeder.seedUsers();
         }
 
-        productTypeSeeder.seedProductTypes();
-        productSizeSeeder.seedProductSize();
-        colorSeeder.seedColors();
-        productSeeder.seedProducts(
-                userService.getAll(),
-                colorService.getAll(),
-                productTypeService.getAll(),
-                productSizeService.getAll()
-                );
-        imageSeeder.seedImages();
+//        productTypeSeeder.seedProductTypes();
+//        productSizeSeeder.seedProductSize();
+//        colorSeeder.seedColors();
+//        productSeeder.seedProducts(
+//                userService.getAll(),
+//                colorService.getAll(),
+//                productTypeService.getAll(),
+//                productSizeService.getAll()
+//                );
+
+//        imageSeeder.seedImages();
     }
 }

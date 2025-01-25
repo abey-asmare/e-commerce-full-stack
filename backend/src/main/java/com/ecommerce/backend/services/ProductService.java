@@ -10,9 +10,14 @@ import org.modelmapper.ModelMapper;
 
 import com.ecommerce.backend.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.nio.file.FileStore;
@@ -55,14 +60,34 @@ public class ProductService {
     }
 
 
-    @Transactional
+@Transactional
+@CachePut(value = "productsCache", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
+public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
+    Page<Product> products = productRepository.findAllWithImages(pageable);
 
-    public List<ProductResponseDto> getAllProducts() {
-        List<Product> products = productRepository.findAllWithImages();
-         return products.stream()
-                .map(product -> modelMapper.map(product, ProductResponseDto.class))
-                .collect(Collectors.toList());
-    }
+    // Get the base URL dynamically
+    String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+
+    // Map each product and set the full image URLs
+    return products.map(product -> {
+        ProductResponseDto dto = modelMapper.map(product, ProductResponseDto.class);
+
+        // Set full URLs for product images
+        List<ProductImageResponseDto> imageDtos = product.getImages().stream()
+                .map(image -> {
+                    ProductImageResponseDto imageDto = new ProductImageResponseDto();
+                    imageDto.setId(image.getId());
+                    imageDto.setImageUrl(baseUrl  + image.getImageUrl());
+                    return imageDto;
+                })
+                .toList();
+
+        dto.setImages(imageDtos);
+        return dto;
+    });
+}
+
+
 
     public ProductDetailResponseDto getProductDetail(Long productId) {
         Optional<Product> productOpt = productRepository.findById(productId);
@@ -80,7 +105,7 @@ public class ProductService {
                 .collect(Collectors.toList()));
 
         responseDto.setRelatedProducts(product.getRelatedProducts().stream()
-                .map(relatedProduct -> modelMapper.map(relatedProduct, RelatedProductResponseDto.class))
+                .map(relatedProduct -> modelMapper.map(relatedProduct, RelatedProductResponseDto.class) )
                 .collect(Collectors.toSet()));
 
         responseDto.setComments(product.getComments().stream()

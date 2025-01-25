@@ -196,6 +196,7 @@ export const useProductListingStore = create((set, get) => ({
   filteredProducts: null,
   error: null,
   loading: false,
+  page: 0,
 
   getAllProducts: async () => {
     set({ loading: true, error: null });
@@ -205,6 +206,28 @@ export const useProductListingStore = create((set, get) => ({
     } catch (error) {
       set({ error: `Failed to fetch product data ${error}`, loading: false });
     }
+  },
+
+  loadMoreProducts: () => {
+    set({ loading: true, error: null });
+    getProducts(get().page)
+      .then((response) => {
+        console.log("response..", response.content);
+        set((state) => ({
+          products: [...(state.products || []), ...response.content],
+          loading: false,
+        }));
+      })
+      .catch((error) =>
+        set({
+          error: `Failed to fetch product data: ${error.message}`,
+          loading: false,
+        })
+      );
+  },
+
+  setPage: () => {
+    set((state) => ({ page: state.page + 1 }));
   },
 
   setProducts: (products) =>

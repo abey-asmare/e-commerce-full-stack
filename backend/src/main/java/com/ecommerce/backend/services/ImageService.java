@@ -17,6 +17,10 @@ public class ImageService {
         imageRepository.save(image);
     }
 
+    public List<ProductImage> getAll(){
+        return imageRepository.findAll();
+    }
+
 
     public List<ProductImage> getImagesForProduct(Long productId) {
         return imageRepository.findByProductId(productId);

@@ -13,6 +13,8 @@ public class ProductResponseDto {
     private String description;
     private Integer availableQuantity;
     private String label;
+    private Double price;
+    private Integer discountedPercentage;
     private List<ProductImageResponseDto> images;
 
 }

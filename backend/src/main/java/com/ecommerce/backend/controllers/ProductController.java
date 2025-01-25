@@ -13,6 +13,7 @@ import com.ecommerce.backend.models.Product;
 import com.ecommerce.backend.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +30,8 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public List<ProductResponseDto> getAllProducts(){
-        return productService.getAllProducts();
+    public Page<ProductResponseDto> getAllProducts( @PageableDefault(size = 10) Pageable pageable){
+        return productService.getAllProducts(pageable);
     }
 
     @GetMapping("/test")

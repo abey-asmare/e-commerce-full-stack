@@ -3,7 +3,7 @@ import "./styles.css";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Category from "@/components/Category";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useFilterSheetStore, useProductListingStore } from "@/store/store";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -11,35 +11,41 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SM_CARD_DELAYS } from "@/lib/constants";
 
 function ProductListings() {
-  const { products, filterProducts,  getAllProducts, loading, error, reset } =
-    useProductListingStore();
-  const { filters, setFilters, applyFilters, resetFilters } = useFilterSheetStore()
+  const {
+    products,
+    page,
+    getAllProducts,
+    loadMoreProducts,
+    loading,
+    error,
+    setPage,
+    reset,
+  } = useProductListingStore();
+  const { filters } = useFilterSheetStore();
+  // useEffect(() => {
+  //   ();
+  // }, [filters]);
+
   useEffect(() => {
-    getAllProducts()
-  }, [filters])
+    loadMoreProducts();
+  }, [page]);
 
+  const observer = useRef();
+  const lastProductElementRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
 
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setPage();
+        }
+      });
 
-
-  if (loading) {
-    return (
-      <div className="px-2 md:px-14 lg:m-auto">
-        <Category></Category>
-        <div className="products-container flex flex-wrap justify-center gap-2 md:gap-5">
-          {Array.from({ length: 16 }).map((value) => (
-            <LargeProductCard key={value} skeleton={loading}></LargeProductCard>
-          ))}
-        </div>
-
-        <Skeleton className=" h-2 my-1 md:h-3 md:my-2 w-1/4 w-4/5"></Skeleton>
-        <div className="products-container flex flex-wrap justify-center gap-2 md:gap-5">
-          {Array.from({ length: 16 }).map((value) => (
-            <SmallProductCard key={value} skeleton={loading}></SmallProductCard>
-          ))}
-        </div>
-      </div>
-    );
-  }
+      if (node) observer.current.observe(node);
+    },
+    [loading]
+  );
 
   if (error) {
     return (
@@ -53,12 +59,17 @@ function ProductListings() {
     <div className="px-2 md:px-14 lg:m-auto">
       <Category></Category>
       <div className="products-container flex flex-wrap gap-2 sm:gap-5 justify-center">
-        {products?.map((product) => (
-          <LargeProductCard
+        {products?.map((product, index) => (
+          <a
+            href=""
             key={product.id}
-            product={product}
-            skeleton={loading}
-          ></LargeProductCard>
+            ref={products.length === index + 1 ? lastProductElementRef : null}
+          >
+            <LargeProductCard
+              key={product.id}
+              product={product}
+            ></LargeProductCard>
+          </a>
         ))}
       </div>
 
@@ -70,25 +81,24 @@ function ProductListings() {
       </p>
 
       <div className="products-container flex flex-wrap gap-5 justify-center">
-        {products?.map((product) => (
-          <SmallProductCard
-            key={product.id}
-            product={product}
-            skeleton={loading}
-          ></SmallProductCard>
-        ))}
+        {/* {products?.map((product) => (
+            <SmallProductCard
+              key={product.id}
+              product={product}
+            ></SmallProductCard>
+        ))} */}
       </div>
     </div>
   );
 }
 
 function SmallProductCard({
-  skeleton = true,
   product,
   variant = "productlisting",
   withCancelBtn = false,
 }) {
-  return skeleton ? (
+  const { loading } = useProductListingStore();
+  return loading ? (
     <div key={product?.id} className="product-small-container  max-w-[330px]">
       <div className="product-small flex gap-4 my-4 group/heroItem">
         <div className="product-img  rounded-sm overflow-hidden w-16 h-16 md:w-24 md:h-24">
@@ -184,8 +194,9 @@ function SmallProductCard({
   );
 }
 
-function LargeProductCard({ skeleton = true, product }) {
-  return skeleton ? (
+function LargeProductCard({ product }) {
+  const { loading } = useProductListingStore();
+  return loading ? (
     <div
       key={product?.id}
       className="product-img-lg-container my-2 w-[160px] lg:h-[520px] md:w-[200px] lg:w-[260px] max-w-[260px]"
@@ -219,19 +230,19 @@ function LargeProductCard({ skeleton = true, product }) {
       <div className=" product-lg products flex flex-col gap-2 group/heroItem ">
         <div className="product-img overflow-hidden  w-full h-1/2 rounded-sm">
           <img
-            src={product.imageUrl}
+            src={product.images[0].imageUrl}
             className="w-full h-full object-cover"
             alt="t-shrit images"
           />
         </div>
         <div className="product-sm-img-container gap-2 hidden lg:flex">
-          {product.subImageUrls.map((url, index) => (
+          {product.images.map((image, index) => (
             <div
-              key={url}
+              key={image.id}
               className={`product-sm-img rounded-sm overflow-hidden hidden group-hover/heroItem:inline-block product-xsm w-8 h-8 animate-opaquex ${SM_CARD_DELAYS[index]}`}
             >
               <img
-                src={url}
+                src={image.imageUrl}
                 className="w-full h-full object-cover"
                 alt="additional images"
               />
@@ -247,16 +258,20 @@ function LargeProductCard({ skeleton = true, product }) {
           </p>
           <p className="product-name ">{product.title}</p>
           <p className="product-price font-semibold">
-            ${product.discount ? product.discountedPrice : product.price}
-            {product.discount && (
+            {product.discountedPercentage !== 0
+              ? product.price -
+                (product.discountedPercentage / 100) * product.price
+              : product.price}
+            Birr
+            {product.discountedPercentage !== 0 && (
               <sup className="px-2 text-c_red-500 line-through">
-                ${product.price}
+                ${product.price}Birr
               </sup>
             )}
           </p>
-          {product.discount && (
+          {product.discountedPercentage !== 0 && (
             <p className="product-status text-green-700">
-              {Math.round(product.price / product.discountedPrice) * 100}% off
+              {product.discountedPercentage}% off
             </p>
           )}
         </div>

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Default;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -58,8 +59,16 @@ public class Product {
     @Column(nullable = false)
     private Integer availableQuantity;
 
+    @Column(nullable = false)
+    private Double price;
+
+    @Column
+    private Integer discountedPercentage;
+
+
     @Transient
     private String label;
+
 
 @PostLoad
 public void setLabel() {
