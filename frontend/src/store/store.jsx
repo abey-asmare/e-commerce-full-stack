@@ -1,6 +1,7 @@
 import { getProducts } from "@/lib/api";
 import { useEffect } from "react";
 import { create } from "zustand";
+import { useProductListingStore } from "./ProductListingStore";
 
 export const useCategoryStore = create((set) => ({
   currentCategory: "all",
@@ -230,7 +231,8 @@ export const useFilterSheetStore = create((set, get) => ({
       selected: [30, 3500],
     },
   ],
-  setFilters: (title, payload) =>
+
+  setFilters: (title, payload) => {
     set((state) => ({
       filters: state.filters.map((filter) => {
         if (filter.title !== title) return filter;
@@ -251,10 +253,10 @@ export const useFilterSheetStore = create((set, get) => ({
             return filter;
         }
       }),
-    })),
+    }));
+  },
 
-  prepareFiltersForProducts(filters) {
-    // Initialize the resulting arguments with default values
+  prepareFiltersForProducts() {
     const result = {
       page: 0,
       limit: 12,
@@ -267,27 +269,77 @@ export const useFilterSheetStore = create((set, get) => ({
       sortBy: null,
     };
 
-    filters.forEach((filter) => {
-      if (filter.type === "radio") {
-        if (filter.title === "Gender") {
-          result.gender = filter.selected;
+    get()
+      .extractSelectedFilters()
+      .map((selectedFilters) => {
+        console.log(selectedFilters);
+        if (selectedFilters.title.toLowerCase() == "Sort by".toLowerCase())
+          result.sortBy = "Price(HIGH TO LOW)";
+        else if (
+          selectedFilters.title.toLowerCase() == "discount".toLowerCase()
+        ) {
+          if (selectedFilters.filters[0] === "Up to 20%") {
+            [result.minDiscountPercentage, result.maxDiscountPercentage] = [
+              0, 20,
+            ];
+          } else if (selectedFilters.filters[0] === "20 - 30%") {
+            [result.minDiscountPercentage, result.maxDiscountPercentage] = [
+              20, 30,
+            ];
+          } else if (selectedFilters.filters[0] === "30-40%") {
+            [result.minDiscountPercentage, result.maxDiscountPercentage] = [
+              30, 40,
+            ];
+          } else {
+            result.minDiscountPercentage = 40;
+            result.maxDiscountPercentage = 100;
+          }
+        } else if (
+          selectedFilters.title.toLowerCase() == "Gender".toLowerCase()
+        ) {
+          result.gender = selectedFilters.filters[0].toLowerCase();
+        } else if (
+          selectedFilters.title.toLowerCase() == "size".toLowerCase()
+        ) {
+          result.productSize = selectedFilters.filters[0].toLowerCase();
+        } else if (
+          selectedFilters.title.toLowerCase() == "price".toLowerCase()
+        ) {
+          [result.minPrice, result.maxPrice] = selectedFilters.filters;
         }
-      } else if (filter.type === "checkbox") {
-        if (filter.title === "Product Size") {
-          result.productSize = filter.selected;
-        }
-      } else if (filter.type === "draggable") {
-        if (filter.title === "Price") {
-          [result.minPrice, result.maxPrice] = filter.selected;
-        } else if (filter.title === "Discount Percentage") {
-          [result.minDiscountPercentage, result.maxDiscountPercentage] =
-            filter.selected;
-        }
-      }
-    });
-
+      });
+    console.log("result", result);
     return result;
   },
+  removeFromFilter: (title, item) =>
+    set((state) => ({
+      filters: state.filters.map((filter) => {
+        // If the filter title doesn't match, return it unchanged
+        if (filter.title !== title) return filter;
+
+        switch (filter.type) {
+          case "radio":
+            // Reset if the selected value matches the item
+            return filter.selected === item
+              ? { ...filter, selected: "" }
+              : filter;
+
+          case "checkbox":
+            // Remove the item from the selected array, if it exists
+            return {
+              ...filter,
+              selected: filter.selected.filter((val) => val !== item),
+            };
+
+          case "draggable":
+            // Reset the selected value to the default slider range
+            return { ...filter, selected: [...filter.values] };
+
+          default:
+            return filter;
+        }
+      }),
+    })),
 
   extractSelectedFilters: () => {
     return get()

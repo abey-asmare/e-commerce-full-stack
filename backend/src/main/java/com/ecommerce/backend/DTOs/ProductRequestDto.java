@@ -1,5 +1,6 @@
 package com.ecommerce.backend.DTOs;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -16,15 +17,23 @@ public class ProductRequestDto {
     private String description;
 
     @NotBlank(message = "Available quantity is required")
-    private String availableQuantity;
+    private Integer availableQuantity;
 
     @NotBlank(message = "Color name is required")
     private String colorName;
 
+    @NotBlank(message = "price is required")
+    @Min(0)
+    private Double price;
+
     @NotBlank(message = "Product type is required")
     private String productTypeName;
 
-    private String sizeName;
+    @NotBlank(message = "Gender is required")
+    private String gender;
+
+    @NotBlank(message= "product size is required")
+    private List<String> sizeNames;
 
     @Size(max = 4, message = "You can upload up to 4 images")
     private List<MultipartFile> images;

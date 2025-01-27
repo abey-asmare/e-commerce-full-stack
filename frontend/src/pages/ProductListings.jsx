@@ -7,13 +7,40 @@ import LargeProductCard from "@/components/ProductListings/LargeProductCard";
 import { useFilterSheetStore } from "@/store/store";
 
 function ProductListings() {
-  const { products, page, loadMoreProducts, loading, error, setPage } =
-    useProductListingStore();
-  const { filters, extractSelectedFilters } = useFilterSheetStore();
+  const {
+    products,
+    filteredProducts,
+    setFilteredProducts,
+    page,
+    loadMoreProducts,
+    loadFilterProducts,
+    loading,
+    error,
+    setPage,
+    isFilterApplied,
+    filteredPage,
+  } = useProductListingStore();
+  const { filters, prepareFiltersForProducts, extractSelectedFilters } =
+    useFilterSheetStore();
+
+  useEffect(() => {
+    const appliedFilters = prepareFiltersForProducts();
+
+    loadFilterProducts(
+      appliedFilters.page,
+      appliedFilters.productSize,
+      appliedFilters.gender,
+      appliedFilters.minPrice,
+      appliedFilters.maxPrice,
+      appliedFilters.minDiscountPercentage,
+      appliedFilters.maxDiscountPercentage,
+      appliedFilters.sortBy
+    );
+  }, [filters, filteredPage]);
 
   useEffect(() => {
     loadMoreProducts();
-  }, [page, filters]);
+  }, [page]);
 
   const observer = useRef();
   const lastProductElementRef = useCallback(
@@ -39,18 +66,24 @@ function ProductListings() {
       </div>
     );
   }
+
+  const renderedProducts = isFilterApplied ? filteredProducts : products;
   return (
     <div className="px-2 md:px-14 lg:m-auto">
       <Category></Category>
       <div className="products-container flex flex-wrap gap-2 sm:gap-5 justify-center">
-        {products?.map((product, index) => (
+        {renderedProducts?.map((product, index) => (
           <a
             href=""
-            key={product.id}
-            ref={products.length === index + 1 ? lastProductElementRef : null}
+            key={index}
+            ref={
+              renderedProducts.length === index + 1
+                ? lastProductElementRef
+                : null
+            }
           >
             <LargeProductCard
-              key={product.id}
+              key={index}
               product={product}
               skeleton={false}
             ></LargeProductCard>

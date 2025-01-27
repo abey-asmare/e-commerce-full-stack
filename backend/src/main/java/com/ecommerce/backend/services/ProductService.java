@@ -1,6 +1,6 @@
 package com.ecommerce.backend.services;
 
-//pagination
+
 import com.ecommerce.backend.DTOs.*;
 import com.ecommerce.backend.models.*;
 import com.ecommerce.backend.repositories.ImageRepository;
@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 
 import com.ecommerce.backend.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -22,9 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
-import java.nio.file.FileStore;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Filter;
 import java.util.stream.Collectors;
@@ -45,6 +48,9 @@ public class ProductService {
 
     @Autowired
     private ProductSizeService productSizeService;
+
+    @Autowired
+    private GenderService genderService;
 
     @Autowired
     ModelMapper modelMapper;
@@ -80,7 +86,7 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
         case "price,dec" -> Sort.by("price").descending();
         case "newest" -> Sort.by("createdAt").descending();
 //        case "topsellers" -> Sort.by("salesCount").descending();
-        default -> pageable.getSort(); // Default sorting if no match
+        default -> Sort.by("createdAt").descending();
     };
 
     Pageable updatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -147,68 +153,80 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
 
 
 //    create products
-//@Transactional
-//public void createProduct(ProductRequestDto requestDto, List<MultipartFile> images) {
-//    // Fetch and validate related entities
-//    User owner = userService.findById(1L); // Replace with authenticated user logic
-//    Color color = colorService.findByName(requestDto.getColorName());
-//    ProductType productType = productTypeService.findByName(requestDto.getProductTypeName());
-//    ProductSize size = requestDto.getSizeName() != null
-//            ? productSizeService.findBySize(requestDto.getSizeName())
-//            : null;
-//
-//    // Create the product
-//    Product product = new Product();
-//    product.setTitle(requestDto.getTitle());
-//    product.setDescription(requestDto.getDescription());
-//    product.setAvailableQuantity(Integer.valueOf(requestDto.getAvailableQuantity()));
-//    product.setOwner(owner);
-//    product.setColor(color);
-//    product.setProductType(productType);
-//    product.setSizes(size);
-//    product = productRepository.save(product);
-//
-//    // Save images
-//    if (images != null && !images.isEmpty()) {
-//        Product finalProduct = product;
-//        List<ProductImage> productImages = new ArrayList<>();
-//
-//        // Iterate over the images and set 'isPrimary' for the first image
-//        for (int i = 0; i < images.size(); i++) {
-//            MultipartFile image = images.get(i);
-//            String imageUrl = fileStorageService.saveImage(image); // Save the file and return the URL
-//
-//            ProductImage productImage = new ProductImage();
-//            productImage.setImageUrl(imageUrl);
-//            productImage.setProduct(finalProduct);
-//            productImage.setPrimary(i == 0 ); // First image is set as primary
-//
-//            productImages.add(productImage);
-//        }
-//
-//        // Save all product images
-//        imageRepository.saveAll(productImages);
-//    }
-//
-//    // Save related products
-//    if (requestDto.getRelatedProductIds() != null && !requestDto.getRelatedProductIds().isEmpty()) {
-//        Product finalProduct1 = product;
-//        List<RelatedProduct> relatedProducts = requestDto.getRelatedProductIds().stream()
-//                .map(relatedProductId -> {
-//                    Product relatedProduct = productRepository.findById(relatedProductId)
-//                            .orElseThrow(() -> new RuntimeException("Invalid related product ID: " + relatedProductId));
-//                    RelatedProduct relProduct = new RelatedProduct();
-//                    relProduct.setProduct(finalProduct1);
-//                    relProduct.setRelatedProduct(relatedProduct);
-//                    return relProduct;
-//                })
-//                .collect(Collectors.toList());
-//
-//        // Save all related products
-//        relatedProductRepository.saveAll(relatedProducts);
-//    }
+@Transactional
+public void createProduct(ProductRequestDto requestDto, List<MultipartFile> images) {
+
+    // Fetch and validate related entities
+    User owner = userService.findById(1L); // Hardcoded admin user
+    Color color = colorService.findByName(requestDto.getColorName());
+    ProductType productType = productTypeService.findByName(requestDto.getProductTypeName());
+    Gender gender = genderService.findByName(requestDto.getGender());
+
+    // Validate and map sizes
+    List<ProductSize> sizes = requestDto.getSizeNames().stream()
+        .map(size -> productSizeService.findBySize(size))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+    if (sizes.isEmpty()) {
+        throw new RuntimeException("Invalid size names provided");
+    }
+
+    // Create the product
+    Product product = new Product();
+    product.setTitle(requestDto.getTitle());
+    product.setGender(gender);
+    product.setPrice(requestDto.getPrice());
+    product.setDescription(requestDto.getDescription());
+    product.setAvailableQuantity(requestDto.getAvailableQuantity());
+    product.setOwner(owner);
+    product.setColor(color);
+    product.setProductType(productType);
+    product.setSizes(sizes);
+
+    product = productRepository.save(product);
+//    log.info("Product created with ID: {}", product.getId());
+    System.out.println("product created successfully");
+    // Save images
+    if (images != null && !images.isEmpty()) {
+        saveProductImages(product, images);
+    }
+
+    // Save related products
+    if (requestDto.getRelatedProductIds() != null && !requestDto.getRelatedProductIds().isEmpty()) {
+//        saveRelatedProducts(product, requestDto.getRelatedProductIds());
+    }
+}
+
+private void saveProductImages(Product product, List<MultipartFile> images) {
+    List<ProductImage> productImages = new ArrayList<>();
+    for (int i = 0; i < images.size(); i++) {
+        MultipartFile image = images.get(i);
+
+        String imageUrl = fileStorageService.saveImage(image);
+        ProductImage productImage = new ProductImage();
+        productImage.setImageUrl(imageUrl);
+        productImage.setProduct(product);
+        productImage.setPrimary(i == 0); // First image is primary
+        productImages.add(productImage);
+    }
+    imageRepository.saveAll(productImages);
 //}
-//
+
+//    private void saveRelatedProducts(Product product, List<Long> relatedProductIds) {
+//    List<RelatedProduct> relatedProducts = relatedProductIds.stream()
+//        .map(relatedProductId -> {
+//            Product relatedProduct = productRepository.findById(relatedProductId)
+//                .orElseThrow(() -> new InvalidRelatedProductException("Invalid related product ID: " + relatedProductId));
+//            RelatedProduct relProduct = new RelatedProduct();
+//            relProduct.setProduct(product);
+//            relProduct.setRelatedProduct(relatedProduct);
+//            return relProduct;
+//        })
+//        .collect(Collectors.toList());
+//    relatedProductRepository.saveAll(relatedProducts);
+//    log.info("Related products saved for product ID: {}", product.getId());
+}
+
 
     public Long countProducts(){
         return productRepository.count();

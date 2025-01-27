@@ -3,10 +3,12 @@ import { create } from "zustand";
 
 export const useProductListingStore = create((set, get) => ({
   products: null,
-  filteredProducts: null,
+  filteredProducts: [],
   error: null,
   loading: false,
   page: 0,
+  isFilterApplied: false,
+  setIsFilterApplied: (isFilterApplied) => set({ isFilterApplied }),
 
   getAllProducts: async () => {
     set({ loading: true, error: null });
@@ -18,40 +20,58 @@ export const useProductListingStore = create((set, get) => ({
     }
   },
 
-  loadMoreProducts: (
+  loadFilterProducts: (
+    page,
     productSize,
     gender,
     minPrice,
     maxPrice,
     minDiscountPercentage,
-    maxDiscountPercentage
+    maxDiscountPercentage,
+    sortBy
   ) => {
-    set({ loading: true, error: null });
-    // console.log("set loading", get().loading);
-
+    set({ page: 0, products: [], loading: true, error: null });
     getProducts(
-      get().page,
+      page,
       productSize,
       gender,
       minPrice,
       maxPrice,
       minDiscountPercentage,
-      maxDiscountPercentage
+      maxDiscountPercentage,
+      sortBy
     )
       .then((response) => {
-        // console.log("response..", response.content);
         set((state) => ({
           products: [...(state.products || []), ...response.content],
+
           loading: false,
         }));
-        // console.log("set loading", get().loading);
       })
       .catch((error) => {
         set({
           error: `Failed to fetch product data: ${error.message}`,
           loading: false,
         });
-        // console.log("set loading", get().loading);
+      });
+  },
+
+  loadMoreProducts: () => {
+    set({ products: [], loading: true, error: null });
+
+    getProducts(get().page)
+      .then((response) => {
+        set((state) => ({
+          products: [...(state.products || []), ...response.content],
+          // filteredProducts: [],
+          loading: false,
+        }));
+      })
+      .catch((error) => {
+        set({
+          error: `Failed to fetch product data: ${error.message}`,
+          loading: false,
+        });
       });
   },
 
@@ -59,8 +79,8 @@ export const useProductListingStore = create((set, get) => ({
     set((state) => ({ page: state.page + 1 }));
   },
 
-  setProducts: (products) =>
-    set(() => ({ products, filteredProducts: products })),
+  setProducts: (products) => set(() => ({ products })),
+  // setFilteredProducts: (filteredProducts) => set(() => ({ filteredProducts })),
   setError: (error) => set(() => ({ error })),
   setLoading: (loading) => set(() => ({ loading })),
 
@@ -148,7 +168,7 @@ export const useProductListingStore = create((set, get) => ({
       });
     }
 
-    set({ filteredProducts, loading: false });
+    set({ products: filteredProducts, loading: false });
   },
 
   reset: () =>

@@ -36,7 +36,7 @@ function FilterSheet({ children }) {
   let selectedFilters;
 
   useEffect(() => {
-     console.log(extractSelectedFilters());
+    console.log(extractSelectedFilters());
   }, [filters]);
 
   return (
@@ -49,7 +49,11 @@ function FilterSheet({ children }) {
               <div className="flex justify-between">
                 <p>Filter & Sort</p>
 
-                <Button className="text-gray-600" variant="link" onClick={resetFilters}>
+                <Button
+                  className="text-gray-600"
+                  variant="link"
+                  onClick={resetFilters}
+                >
                   Clear all
                 </Button>
               </div>
@@ -57,6 +61,7 @@ function FilterSheet({ children }) {
                 {extractSelectedFilters().map((selectedFilter) => {
                   return (
                     selectedFilter &&
+                    selectedFilter.title !== "Price" &&
                     selectedFilter.filters.map((filter) => (
                       <FilteredItem
                         key={filter}
@@ -84,7 +89,7 @@ function FilterSheet({ children }) {
                         <PriceRangeSlider
                           min={item.values[0]}
                           max={item.values[1]}
-                          step={10}
+                          step={30}
                           value={item.selected}
                         />
                       </div>

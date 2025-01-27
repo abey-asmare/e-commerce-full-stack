@@ -40,7 +40,7 @@ export default function LargeProductCard({ product, skeleton = true }) {
       className="product-img-lg-container my-2 w-[160px] lg:h-[520px] md:w-[200px] lg:w-[260px] max-w-[260px]"
     >
       <div className=" product-lg products flex flex-col gap-2 group/heroItem">
-        <div className="product-img overflow-hidden w-full lg:h-[260px] max-h-full rounded-sm">
+        <div className="product-img overflow-hidden h-[160px] lg:h-[260px] max-h-full rounded-sm">
           <img
             src={product.images[0].imageUrl}
             className="w-full max-h-full h-full object-cover"
@@ -75,17 +75,19 @@ export default function LargeProductCard({ product, skeleton = true }) {
                 (product.discountedPercentage / 100) * product.price
               : product.price}
             Birr
-            {product.discountedPercentage !== 0 && (
+            {product.discountedPercentage !== null &&
+            product.discountedPercentage !== 0 && (
               <sup className="px-2 text-c_red-500 line-through">
                 ${product.price}Birr
               </sup>
             )}
           </p>
-          {product.discountedPercentage !== 0 && (
-            <p className="product-status text-green-700">
-              {product.discountedPercentage}% off
-            </p>
-          )}
+          {product.discountedPercentage !== null &&
+            product.discountedPercentage !== 0 && (
+              <p className="product-status text-green-700">
+                {product.discountedPercentage}% off
+              </p>
+            )}
         </div>
       </div>
     </div>

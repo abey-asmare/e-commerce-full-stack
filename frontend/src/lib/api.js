@@ -243,12 +243,11 @@ export const obj = [
 const SORTBY = {
   "Price(LOW TO HIGH)": "price,asc",
   "Price(HIGH TO LOW)": "price,dec",
-  Newest: "newest",
   "Top Sellers": "topsellers",
+  "Newest": "newest",
 };
 export async function getProducts(
   page,
-  limit = 12,
   productSize,
   gender,
   minPrice,
@@ -259,31 +258,32 @@ export async function getProducts(
 ) {
   const params = {
     page,
-    size: limit,
+    size: 12,
   };
   if (productSize) params.productSize = productSize;
-  if (minDiscountPercentage) params.minDiscountPercentage = maxPrice;
-  if (maxDiscountPercentage) params.maxDiscountPercentage = maxPrice;
-  if (minPrice) params.minPrice = minPrice;
-  if (maxPrice) params.maxPrice = maxPrice;
-  if (gender) params.gender = maxPrice;
-  if (sortBy) params.sortBy = SORTBY[params.sortBy];
+  if (gender) params.gender = gender;
+  if (minPrice !== null) params.minPrice = minPrice;
+  if (maxPrice !== null) params.maxPrice = maxPrice;
+  if (minDiscountPercentage !== null)
+    params.minDiscountPercentage = minDiscountPercentage;
+  if (maxDiscountPercentage !== null)
+    params.maxDiscountPercentage = maxDiscountPercentage;
+  if (sortBy !== null) params.sortBy = SORTBY[sortBy];
+  console.log("params", params);
 
-  // return axios
-  //   .get(`http://localhost:8080/api/v1/products`, { params })
-  //   .then((response) => {
-  //     return new Promise((resolve) => {
-  //       setTimeout(() => resolve(response.data), 2000); // 2-second delay
-  //     });
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //     throw err;
-  //   });
+  let timeoutId = null;
+
   return axios
     .get(`http://localhost:8080/api/v1/products`, { params })
     .then((response) => {
-      return response.data;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(response.data);
+        }, 2000);
+      });
     })
     .catch((err) => {
       console.log(err);

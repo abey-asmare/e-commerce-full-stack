@@ -3,9 +3,7 @@ import { Button } from "../ui/button";
 import { useFilterSheetStore } from "@/store/store";
 
 function FilteredItem({ children, key, title, item }) {
-  const removeFromFilter = useFilterSheetStore(
-    (state) => state.removeFromFilter
-  );
+  const { removeFromFilter } = useFilterSheetStore();
   return (
     <button
       key={key}

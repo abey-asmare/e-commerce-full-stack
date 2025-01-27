@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
-import * as Slider from '@radix-ui/react-slider';
+import React, { useEffect, useState } from "react";
+import * as Slider from "@radix-ui/react-slider";
+import { useFilterSheetStore } from "@/store/store";
 
 const PriceRangeSlider = ({ min, max, step }) => {
-  const [value, setValue] = useState([min, max]);
+  const { filters, setFilters, extractSelectedFilters } = useFilterSheetStore();
+
+  const [filterValues] = filters.filter((filter) => filter.title === "Price");
+
+  useEffect(() => {
+    console.log("pr", extractSelectedFilters());
+    console.log("price", filterValues);
+  }, [filters]);
 
   return (
     <div className="w-full px-4 py-8">
       <Slider.Root
         className="relative flex items-center select-none touch-none w-full h-5"
-        value={value}
-        onValueChange={setValue}
+        value={filterValues.selected}
+        onValueChange={(value) => setFilters("Price", value)}
         min={min}
         max={max}
         step={step}
@@ -27,12 +35,11 @@ const PriceRangeSlider = ({ min, max, step }) => {
         />
       </Slider.Root>
       <div className="flex justify-between mt-4 text-sm text-gray-600">
-        <span>Min: ${value[0]}</span>
-        <span>Max: ${value[1]}</span>
+        <span>Min: ${filterValues.selected[0]}</span>
+        <span>Max: ${filterValues.selected[1]}</span>
       </div>
     </div>
   );
 };
 
 export default PriceRangeSlider;
-

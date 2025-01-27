@@ -42,31 +42,18 @@ public class ProductController {
                                                     ){
         return productService.getAllProducts(productSize, minDiscount, maxDiscount,minPrice, maxPrice,  gender,  sortBy, pageable);
     }
-
-    @GetMapping("/test")
-    public String testProducts(){
-        return "test api";
-    }
-
-    @GetMapping("/alternative")
-    public List<Product> getall(){
-        List<Product> products = productService.getAllProducts_();
-         products.forEach(product -> System.out.println("Product: " + product));
-        return products;
-    }
-
     @GetMapping("/{id}")
     public ProductDetailResponseDto getProduct(@PathVariable Long id){
         return productService.getProductDetail(id);
     }
 
 
-//   @PostMapping
-//    public ResponseEntity<String> createProduct(
-//            @ModelAttribute ProductRequestDto requestDto,
-//            @RequestParam("images") List<MultipartFile> images) {
-//        productService.createProduct(requestDto, images);
-//        return ResponseEntity.ok("Product created successfully");
-//    }
+   @PostMapping
+    public ResponseEntity<String> createProduct(
+            @ModelAttribute ProductRequestDto requestDto,
+            @RequestParam("images") List<MultipartFile> images) {
+        productService.createProduct(requestDto, images);
+        return ResponseEntity.ok("Product created successfully");
+    }
 }
 
