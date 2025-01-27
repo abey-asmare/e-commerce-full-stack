@@ -30,8 +30,17 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public Page<ProductResponseDto> getAllProducts( @PageableDefault(size = 10) Pageable pageable){
-        return productService.getAllProducts(pageable);
+    public Page<ProductResponseDto> getAllProducts(
+                                                    @RequestParam(required = false) String productSize,
+                                                    @RequestParam(required = false) Integer minDiscount,
+                                                    @RequestParam(required = false) Integer maxDiscount,
+                                                    @RequestParam(required = false) Double minPrice,
+                                                    @RequestParam(required = false) Double maxPrice,
+                                                    @RequestParam(required = false) String gender,
+                                                    @RequestParam(required = false) String sortBy,
+                                                    @PageableDefault(size = 10) Pageable pageable
+                                                    ){
+        return productService.getAllProducts(productSize, minDiscount, maxDiscount,minPrice, maxPrice,  gender,  sortBy, pageable);
     }
 
     @GetMapping("/test")
@@ -52,12 +61,12 @@ public class ProductController {
     }
 
 
-   @PostMapping
-    public ResponseEntity<String> createProduct(
-            @ModelAttribute ProductRequestDto requestDto,
-            @RequestParam("images") List<MultipartFile> images) {
-        productService.createProduct(requestDto, images);
-        return ResponseEntity.ok("Product created successfully");
-    }
+//   @PostMapping
+//    public ResponseEntity<String> createProduct(
+//            @ModelAttribute ProductRequestDto requestDto,
+//            @RequestParam("images") List<MultipartFile> images) {
+//        productService.createProduct(requestDto, images);
+//        return ResponseEntity.ok("Product created successfully");
+//    }
 }
 

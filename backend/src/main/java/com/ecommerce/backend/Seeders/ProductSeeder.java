@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 
 @Component
@@ -35,7 +36,7 @@ public class ProductSeeder {
                   .orElseThrow(()-> new RuntimeException("no admin exists in the database"));
             Color color = colors.get(0); // Pick first color
             ProductType productType = productTypes.get(0); // Pick first product type
-            ProductSize size = productSizes.get(0); // Pick first product size
+//            ProductSize size = productSizes.get(0); // Pick first product size
 
             // Product 1
             Product product = new Product();
@@ -44,7 +45,7 @@ public class ProductSeeder {
             product.setOwner(owner);
             product.setColor(color);
             product.setProductType(productType);
-            product.setSize(size);
+            product.setSizes(productSizes);
             product.setAvailableQuantity(3);
             product.setUpdatedAt(LocalDateTime.now());
             productService.saveProduct(product);
@@ -56,7 +57,7 @@ public class ProductSeeder {
             product2.setOwner(owner);
             product2.setColor(color);
             product2.setProductType(productType);
-            product2.setSize(size);
+            product2.setSizes(productSizes);
             product2.setAvailableQuantity(2); // Low stock
             product2.setUpdatedAt(LocalDateTime.now().minusDays(10)); // Received 10 days ago
             productService.saveProduct(product2);

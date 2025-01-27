@@ -1,9 +1,9 @@
 package com.ecommerce.backend.Seeders;
 
-import com.ecommerce.backend.models.Color;
 import com.ecommerce.backend.services.ColorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.ecommerce.backend.models.Color;
 
 @Component
 public class ColorSeeder {

@@ -15,6 +15,7 @@ public class ProductImage {
     private Long id;
 
 
+//    @Column(unique = true)
     private String imageUrl;
     private boolean isPrimary;
 

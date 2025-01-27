@@ -19,7 +19,7 @@ public class ProductDetailResponseDto {
     private String owner;
     private String colorName;
     private String productTypeName;
-    private String sizeName;
+    private List<ProductSize> sizeName;
     private List<ProductImageResponseDto> images;
     private Set<RelatedProductResponseDto> relatedProducts;
     private Set<CommentResponseDto> comments;

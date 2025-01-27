@@ -239,17 +239,54 @@ export const obj = [
 //     }, 3000);
 //   });
 // }
-export async function getProducts(page, limit = 12) {
+
+const SORTBY = {
+  "Price(LOW TO HIGH)": "price,asc",
+  "Price(HIGH TO LOW)": "price,dec",
+  Newest: "newest",
+  "Top Sellers": "topsellers",
+};
+export async function getProducts(
+  page,
+  limit = 12,
+  productSize,
+  gender,
+  minPrice,
+  maxPrice,
+  minDiscountPercentage,
+  maxDiscountPercentage,
+  sortBy
+) {
+  const params = {
+    page,
+    size: limit,
+  };
+  if (productSize) params.productSize = productSize;
+  if (minDiscountPercentage) params.minDiscountPercentage = maxPrice;
+  if (maxDiscountPercentage) params.maxDiscountPercentage = maxPrice;
+  if (minPrice) params.minPrice = minPrice;
+  if (maxPrice) params.maxPrice = maxPrice;
+  if (gender) params.gender = maxPrice;
+  if (sortBy) params.sortBy = SORTBY[params.sortBy];
+
+  // return axios
+  //   .get(`http://localhost:8080/api/v1/products`, { params })
+  //   .then((response) => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => resolve(response.data), 2000); // 2-second delay
+  //     });
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //     throw err;
+  //   });
   return axios
-    .get(`http://localhost:8080/api/v1/products?page=${page}&size=${limit}`)
+    .get(`http://localhost:8080/api/v1/products`, { params })
     .then((response) => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(response.data), 1000); // 1-second delay
-      });
+      return response.data;
     })
     .catch((err) => {
       console.log(err);
       throw err;
     });
 }
-

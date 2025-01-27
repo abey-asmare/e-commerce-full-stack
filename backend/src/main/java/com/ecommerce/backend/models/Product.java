@@ -46,18 +46,30 @@ public class Product {
     @JoinColumn(name = "product_type_id")
     private ProductType productType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "size_id")
-    private ProductSize size;
+    @ManyToOne
+    @JoinColumn(name = "gender_id", nullable = false)
+    private Gender gender;
+
+    @ManyToMany
+    @JoinTable(
+        name = "product_product_size",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "product_size_id")
+    )
+    private List<ProductSize> sizes = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RelatedProduct> relatedProducts = new HashSet<>();
+
+
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
 
     @Column(nullable = false)
     private Integer availableQuantity;
+
 
     @Column(nullable = false)
     private Double price;
@@ -69,22 +81,24 @@ public class Product {
     @Transient
     private String label;
 
-
-@PostLoad
-public void setLabel() {
-    if (this.availableQuantity <= 0) {
-        this.label = "Out of Stock";
-    } else if (this.availableQuantity <= 5) {
-        this.label = "Only " + this.availableQuantity + " In Stock";
-    } else if (this.updatedAt != null && this.updatedAt.isAfter(LocalDateTime.now().minusDays(30))) {
-        this.label = "Just In";
-    } else {
-        this.label = null;
+    @PostLoad
+    public void setLabel() {
+        if (this.availableQuantity <= 0) {
+            this.label = "Out of Stock";
+        } else if (this.availableQuantity <= 5) {
+            this.label = "Only " + this.availableQuantity + " In Stock";
+        } else if (this.updatedAt != null && this.updatedAt.isAfter(LocalDateTime.now().minusDays(30))) {
+            this.label = "Just In";
+        } else {
+            this.label = null;
+        }
     }
-}
+
+    @Transient
+    private int availableColors;
 
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ProductImage> images = new ArrayList<>();
 

@@ -5,6 +5,7 @@ import com.ecommerce.backend.repositories.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -21,8 +22,15 @@ public class ImageService {
         return imageRepository.findAll();
     }
 
-
+    public List<ProductImage> getAllById(Iterable<Long> ids){
+        return imageRepository.findAllById(ids);
+    }
     public List<ProductImage> getImagesForProduct(Long productId) {
         return imageRepository.findByProductId(productId);
     }
+
+    public boolean isPatternPresent(String pattern){
+        return imageRepository.findByImageUrlContains(pattern);
+    }
+
 }

@@ -8,4 +8,7 @@ import java.util.List;
 public interface ImageRepository extends JpaRepository<ProductImage, Long> {
 
     List<ProductImage> findByProductId(Long productId);
+
+    boolean findByImageUrlContains(String pattern);
+
 }

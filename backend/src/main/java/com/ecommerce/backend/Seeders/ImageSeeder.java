@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Random;
 
 @Component
 public class ImageSeeder {
@@ -24,19 +25,22 @@ public class ImageSeeder {
         if (!products.isEmpty()) {
             for (Product product : products) {
                 // Add primary image
-                ProductImage primaryImage = new ProductImage();
-                primaryImage.setImageUrl("/images/" + product.getTitle().replace(" ", "-").toLowerCase() + "-primary.jpg");
-                primaryImage.setPrimary(true);
-                primaryImage.setProduct(product);
-                imageService.saveImage(primaryImage);
+                if(product.getImages().size()  == 0 )
+                {
+                    ProductImage primaryImage = new ProductImage();
+                    primaryImage.setImageUrl("/images/" + product.getTitle().replace(" ", "-").toLowerCase() + "-primary.jpg");
+                    primaryImage.setPrimary(true);
+                    primaryImage.setProduct(product);
+                    imageService.saveImage(primaryImage);
 
-                // Add secondary images
-                for (int i = 1; i <= 3; i++) {
-                    ProductImage secondaryImage = new ProductImage();
-                    secondaryImage.setImageUrl("/images/" + product.getTitle().replace(" ", "-").toLowerCase() + "-sub" + i + ".jpg");
-                    secondaryImage.setPrimary(false);
-                    secondaryImage.setProduct(product);
-                    imageService.saveImage(secondaryImage);
+                    // Add secondary images
+                    for (int i = 1; i <= 3; i++) {
+                        ProductImage secondaryImage = new ProductImage();
+                        secondaryImage.setImageUrl("/images/" + product.getTitle().replace(" ", "-").toLowerCase() + "-sub" + i + ".jpg");
+                        secondaryImage.setPrimary(false);
+                        secondaryImage.setProduct(product);
+                        imageService.saveImage(secondaryImage);
+                    }
                 }
             }
         }

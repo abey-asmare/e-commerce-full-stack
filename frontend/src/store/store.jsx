@@ -1,4 +1,5 @@
 import { getProducts } from "@/lib/api";
+import { useEffect } from "react";
 import { create } from "zustand";
 
 export const useCategoryStore = create((set) => ({
@@ -191,145 +192,6 @@ export const useUserAuth = create((set) => ({
   setIsUserLoggedIn: (isUserLoggedIn) => set(() => ({ isUserLoggedIn })),
 }));
 
-export const useProductListingStore = create((set, get) => ({
-  products: null,
-  filteredProducts: null,
-  error: null,
-  loading: false,
-  page: 0,
-
-  getAllProducts: async () => {
-    set({ loading: true, error: null });
-    try {
-      const response = await getProducts();
-      set({ products: response, filteredProducts: response, loading: false });
-    } catch (error) {
-      set({ error: `Failed to fetch product data ${error}`, loading: false });
-    }
-  },
-
-  loadMoreProducts: () => {
-    set({ loading: true, error: null });
-    getProducts(get().page)
-      .then((response) => {
-        console.log("response..", response.content);
-        set((state) => ({
-          products: [...(state.products || []), ...response.content],
-          loading: false,
-        }));
-      })
-      .catch((error) =>
-        set({
-          error: `Failed to fetch product data: ${error.message}`,
-          loading: false,
-        })
-      );
-  },
-
-  setPage: () => {
-    set((state) => ({ page: state.page + 1 }));
-  },
-
-  setProducts: (products) =>
-    set(() => ({ products, filteredProducts: products })),
-  setError: (error) => set(() => ({ error })),
-  setLoading: (loading) => set(() => ({ loading })),
-
-  filterProducts: async (filters) => {
-    set({ loading: true });
-
-    // Simulate a delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const filteredProducts =
-      get().products?.filter((product) => {
-        return filters.every((filter) => {
-          const { title, selected, type } = filter;
-
-          // Skip unselected filters
-          if (
-            (type === "radio" && !selected) ||
-            (type === "checkbox" &&
-              (!Array.isArray(selected) || selected.length === 0)) ||
-            (type === "draggable" &&
-              (!Array.isArray(selected) || selected.length === 0))
-          ) {
-            return true;
-          }
-
-          switch (title) {
-            case "Sort by":
-              return true; // Sorting will be handled separately
-
-            case "Discount":
-              if (typeof selected !== "string") return false;
-              const [min, max] = selected
-                .replace("%", "")
-                .split(" - ")
-                .map(Number);
-              return (
-                product.discount >= min && product.discount <= (max || 100)
-              );
-
-            case "Gender":
-              return (
-                Array.isArray(selected) && selected.includes(product.gender)
-              );
-
-            case "Size":
-              return (
-                Array.isArray(selected) &&
-                product.size.some((size) => selected.includes(size))
-              );
-
-            case "Price":
-              return (
-                Array.isArray(selected) &&
-                product.price >= selected[0] &&
-                product.price <= selected[1]
-              );
-
-            default:
-              return true;
-          }
-        });
-      }) || null;
-
-    // Handle sorting
-    const sortBy = filters.find(
-      (filter) => filter.title === "Sort by"
-    )?.selected;
-    if (sortBy && filteredProducts) {
-      filteredProducts.sort((a, b) => {
-        switch (sortBy) {
-          case "Price(LOW TO HIGH)":
-            return a.price - b.price;
-          case "Price(HIGH TO LOW)":
-            return b.price - a.price;
-          case "Newest":
-            return (
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-          case "Top Sellers":
-            return b.salesCount - a.salesCount;
-          default:
-            return 0;
-        }
-      });
-    }
-
-    set({ filteredProducts, loading: false });
-  },
-
-  reset: () =>
-    set({
-      products: null,
-      filteredProducts: null,
-      loading: false,
-      error: null,
-    }),
-}));
-
 export const useFilterSheetStore = create((set, get) => ({
   filters: [
     {
@@ -368,7 +230,6 @@ export const useFilterSheetStore = create((set, get) => ({
       selected: [30, 3500],
     },
   ],
-
   setFilters: (title, payload) =>
     set((state) => ({
       filters: state.filters.map((filter) => {
@@ -392,16 +253,64 @@ export const useFilterSheetStore = create((set, get) => ({
       }),
     })),
 
-  extractSelectedFilters: () => {
-    return get().filters.filter((filter) => {
-      if (filter.type === "radio") return filter.selected !== "";
-      if (filter.type === "checkbox") return filter.selected.length > 0;
-      if (filter.type === "draggable") {
-        const [min, max] = filter.selected;
-        return min !== filter.values[0] || max !== filter.values[1];
+  prepareFiltersForProducts(filters) {
+    // Initialize the resulting arguments with default values
+    const result = {
+      page: 0,
+      limit: 12,
+      productSize: null,
+      gender: null,
+      minPrice: null,
+      maxPrice: null,
+      minDiscountPercentage: null,
+      maxDiscountPercentage: null,
+      sortBy: null,
+    };
+
+    filters.forEach((filter) => {
+      if (filter.type === "radio") {
+        if (filter.title === "Gender") {
+          result.gender = filter.selected;
+        }
+      } else if (filter.type === "checkbox") {
+        if (filter.title === "Product Size") {
+          result.productSize = filter.selected;
+        }
+      } else if (filter.type === "draggable") {
+        if (filter.title === "Price") {
+          [result.minPrice, result.maxPrice] = filter.selected;
+        } else if (filter.title === "Discount Percentage") {
+          [result.minDiscountPercentage, result.maxDiscountPercentage] =
+            filter.selected;
+        }
       }
-      return false;
     });
+
+    return result;
+  },
+
+  extractSelectedFilters: () => {
+    return get()
+      .filters.filter((filter) => {
+        if (filter.type === "radio") return filter.selected !== "";
+        if (filter.type === "checkbox") return filter.selected.length > 0;
+        if (filter.type === "draggable") {
+          const [min, max] = filter.selected;
+          return min !== filter.values[0] || max !== filter.values[1];
+        }
+        return false;
+      })
+      .map((filter) => {
+        if (filter.type === "radio") {
+          return { title: filter.title, filters: [filter.selected] };
+        }
+        if (filter.type === "checkbox") {
+          return { title: filter.title, filters: filter.selected };
+        }
+        if (filter.type === "draggable") {
+          return { title: filter.title, filters: filter.selected };
+        }
+      });
   },
 
   resetFilters: () => {

@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -20,18 +19,25 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import PriceRangeSlider from "./Favorites/PriceRangeSlider";
-import { useFilterSheetStore, useProductListingStore } from "@/store/store";
-
+import { useFilterSheetStore } from "@/store/store";
+import { useProductListingStore } from "@/store/ProductListingStore";
+import { X } from "lucide-react";
+import FilteredItem from "./FilterSheet/FilteredItem";
 
 function FilterSheet({ children }) {
-
-  const { filters, setFilters, resetFilters } = useFilterSheetStore();
+  const { filters, extractSelectedFilters, setFilters, resetFilters } =
+    useFilterSheetStore();
   const { applyFiltersAndSort } = useProductListingStore();
 
   const handleApplyFilters = () => {
     applyFiltersAndSort();
   };
 
+  let selectedFilters;
+
+  useEffect(() => {
+     console.log(extractSelectedFilters());
+  }, [filters]);
 
   return (
     <Sheet>
@@ -39,11 +45,30 @@ function FilterSheet({ children }) {
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
-            <div className="flex justify-between mt-4">
-              <p>Filter & Sort</p>
-              <Button className="text-gray-600" variant="link">
-                Clear all
-              </Button>
+            <div className="flex flex-col gap-4 justify-between mt-4">
+              <div className="flex justify-between">
+                <p>Filter & Sort</p>
+
+                <Button className="text-gray-600" variant="link" onClick={resetFilters}>
+                  Clear all
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-start">
+                {extractSelectedFilters().map((selectedFilter) => {
+                  return (
+                    selectedFilter &&
+                    selectedFilter.filters.map((filter) => (
+                      <FilteredItem
+                        key={filter}
+                        title={selectedFilter.title}
+                        item={filter}
+                      >
+                        {filter}
+                      </FilteredItem>
+                    ))
+                  );
+                })}
+              </div>
             </div>
           </SheetTitle>
           <SheetDescription className="text-lg font-semibold text-black">
@@ -65,17 +90,21 @@ function FilterSheet({ children }) {
                       </div>
                     ) : item.type === "radio" ? (
                       item.values.map((value, valueIndex) => (
-
-                      <RadioGroup key={valueIndex}  value={item.selected} onValueChange={(value) =>
-                          setFilters(item.title, value)
-                        } defaultValue="" >
-                        <div className="flex items-center space-x-2 space-y-2">
-                          <RadioGroupItem value={value} id={value} />
-                          <Label htmlFor={value}>{value}</Label>
-                        </div>
-                      </RadioGroup>
-                    ))
-
+                        <RadioGroup
+                          key={valueIndex}
+                          value={item.selected}
+                          onValueChange={(value) => {
+                            setFilters(item.title, value);
+                            console.log(selectedFilters);
+                          }}
+                          defaultValue=""
+                        >
+                          <div className="flex items-center space-x-2 space-y-2">
+                            <RadioGroupItem value={value} id={value} />
+                            <Label htmlFor={value}>{value}</Label>
+                          </div>
+                        </RadioGroup>
+                      ))
                     ) : (
                       item.values.map((value, valueIndex) => (
                         <div
@@ -86,9 +115,10 @@ function FilterSheet({ children }) {
                             id={`${item.title}-${valueIndex}`}
                             className="w-5 h-5"
                             checked={item.selected.includes(value)}
-                            onCheckedChange={() =>
-                              setFilters(item.title, value)
-                            }
+                            onCheckedChange={() => {
+                              setFilters(item.title, value);
+                              console.log(extractSelectedFilters());
+                            }}
                           />
                           <label
                             htmlFor={`${item.title}-${valueIndex}`}

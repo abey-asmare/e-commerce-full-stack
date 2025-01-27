@@ -1,18 +1,13 @@
-import { useCategoryStore, useProductListingStore } from "@/store/store";
+import { useCategoryStore } from "@/store/store";
 import FilterSheet from "./FilterSheet";
-import { Skeleton } from "./ui/skeleton";
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-
+import { useProductListingStore } from "@/store/ProductListingStore";
 
 function Category() {
   const { currentCategory, setCurrentCategory } = useCategoryStore();
-  const loading = useProductListingStore(state => state.loading)
-
-
+  const loading = useProductListingStore((state) => state.loading);
 
   return (
-    <div className={`relative py-4 ${loading ? "invisible": "visible"}`}>
+    <div className={`relative py-4` /**${loading ? "invisible" : "visible"} */}>
       <div className="flex justify-between items-center">
         <div
           className="flex-grow overflow-hidden"
@@ -81,28 +76,26 @@ function Category() {
           </div>
         </div>
         <FilterSheet>
-
-        <div className="flex-shrink-0 ml-4 border-2 border-black flex gap-2 py-1.5 px-2 cursor-pointer whitespace-nowrap bg-white">
-          <p className="hidden sm:flex">Filter & Sort</p>
-          <span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
-              />
-            </svg>
-          </span>
-        </div>
+          <div className="flex-shrink-0 ml-4 border-2 border-black flex gap-2 py-1.5 px-2 cursor-pointer whitespace-nowrap bg-white">
+            <p className="hidden sm:flex">Filter & Sort</p>
+            <span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
+                />
+              </svg>
+            </span>
+          </div>
         </FilterSheet>
-
       </div>
       <style>{`
         /* Hide scrollbar for Chrome, Safari and Opera */

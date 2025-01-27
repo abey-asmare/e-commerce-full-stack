@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 // Size Entity
 @Data
 @RequiredArgsConstructor
@@ -15,4 +18,7 @@ public class ProductSize {
 
     @Column(nullable = false, unique = true)
     private String size;
+
+    @ManyToMany(mappedBy = "sizes")
+    private Set<Product> products = new HashSet<>();
 }
