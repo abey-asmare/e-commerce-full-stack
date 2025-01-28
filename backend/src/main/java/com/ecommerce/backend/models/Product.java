@@ -43,7 +43,7 @@ public class Product {
     private Color color;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_type_id")
+    @JoinColumn(name = "product_type_id", columnDefinition = "bigint default 1", nullable = false)
     private ProductType productType;
 
     @ManyToOne
@@ -67,14 +67,14 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "integer default 1",  nullable = false)
     private Integer availableQuantity;
 
 
     @Column(nullable = false)
     private Double price;
 
-    @Column
+    @Column(columnDefinition = "integer default 1")
     private Integer discountedPercentage;
 
 

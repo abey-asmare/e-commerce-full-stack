@@ -1,7 +1,6 @@
 import { getProducts } from "@/lib/api";
 import { useEffect } from "react";
 import { create } from "zustand";
-import { useProductListingStore } from "./ProductListingStore";
 
 export const useCategoryStore = create((set) => ({
   currentCategory: "all",

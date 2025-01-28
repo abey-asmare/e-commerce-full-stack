@@ -1,8 +1,7 @@
 package com.ecommerce.backend.DTOs;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,13 +15,13 @@ public class ProductRequestDto {
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 
-    @NotBlank(message = "Available quantity is required")
+    @NotNull(message = "Available quantity is required")
     private Integer availableQuantity;
 
     @NotBlank(message = "Color name is required")
     private String colorName;
 
-    @NotBlank(message = "price is required")
+    @NotNull(message = "price is required")
     @Min(0)
     private Double price;
 
@@ -32,7 +31,7 @@ public class ProductRequestDto {
     @NotBlank(message = "Gender is required")
     private String gender;
 
-    @NotBlank(message= "product size is required")
+    @NotEmpty(message= "product size is required")
     private List<String> sizeNames;
 
     @Size(max = 4, message = "You can upload up to 4 images")

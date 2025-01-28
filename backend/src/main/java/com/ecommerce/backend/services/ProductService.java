@@ -177,7 +177,11 @@ public void createProduct(ProductRequestDto requestDto, List<MultipartFile> imag
     product.setGender(gender);
     product.setPrice(requestDto.getPrice());
     product.setDescription(requestDto.getDescription());
+    System.out.println(requestDto);
+    if(requestDto.getAvailableQuantity() == null || requestDto.getAvailableQuantity() <=0)
+        product.setAvailableQuantity(1);
     product.setAvailableQuantity(requestDto.getAvailableQuantity());
+    product.setDiscountedPercentage(0);
     product.setOwner(owner);
     product.setColor(color);
     product.setProductType(productType);

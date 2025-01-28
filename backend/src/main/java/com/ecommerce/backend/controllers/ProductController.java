@@ -5,6 +5,7 @@ import com.ecommerce.backend.DTOs.ProductDetailResponseDto;
 import com.ecommerce.backend.DTOs.ProductRequestDto;
 import com.ecommerce.backend.DTOs.ProductResponseDto;
 import com.ecommerce.backend.models.ProductType;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +51,7 @@ public class ProductController {
 
    @PostMapping
     public ResponseEntity<String> createProduct(
-            @ModelAttribute ProductRequestDto requestDto,
+            @Valid @ModelAttribute ProductRequestDto requestDto,
             @RequestParam("images") List<MultipartFile> images) {
         productService.createProduct(requestDto, images);
         return ResponseEntity.ok("Product created successfully");

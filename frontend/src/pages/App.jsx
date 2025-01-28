@@ -9,7 +9,6 @@ import Register from "./Register";
 import LandingPage from "./LandingPage";
 import ProductListings from "./ProductListings";
 
-
 function App() {
   return (
     <BrowserRouter>
@@ -24,7 +23,7 @@ function App() {
         <Route path="/login" element={<Login></Login>}></Route>
         <Route path="/register" element={<Register></Register>}></Route>
         <Route
-          path="/products/new"
+          path="/products/create"
           element={<ProductForm></ProductForm>}
         ></Route>
         <Route
