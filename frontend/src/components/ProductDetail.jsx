@@ -6,6 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 import PropTypes from "prop-types";
 import { Button } from "./ui/button";
@@ -27,10 +28,56 @@ import Category from "./Category";
 import Comment from "./Favorites/Comment";
 import { useProductStore } from "@/store/store";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { useNavigate, useParams } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import { ACCESS_TOKEN } from "@/lib/constants";
+import { useAuthStore } from "@/store/AuthStore";
 
 function ProductDetail() {
   const { product, reviews } = useProductStore();
-  const  comments = useProductStore(state => state.reviews.items);
+  const [productData, setProductData] = useState({});
+  const [choosenSize, setChoosenSize] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [heroImage, setHeroImage] = useState("");
+  const comments = useProductStore((state) => state.reviews.items);
+  const param = useParams();
+
+  const fetchProductDetails = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/products/${param.id}`);
+      if (response.status == 200) {
+        console.log("response", response.data);
+        setProductData(response.data);
+        setHeroImage(
+          productData && productData.images && productData.images[0].imageUrl
+        );
+
+        setChoosenSize(
+          productData && productData.sizeName && productData.sizeName[0]
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductDetails();
+  }, [param.id]);
+
+  useEffect(() => {
+    if (productData.images && productData.images.length > 0) {
+      setHeroImage(productData.images[0].imageUrl);
+    }
+    if (productData.sizeName && productData.sizeName.length > 0) {
+      setChoosenSize(productData.sizeName[0]);
+    }
+  }, [productData]);
 
   const initialMessages = [
     {
@@ -47,7 +94,63 @@ function ProductDetail() {
     },
   ];
 
-  return (
+  const [authenticatedUser, setAuthenticatedUser] = useState({});
+  const { refreshToken } = useAuthStore();
+
+  useEffect(() => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (token) {
+      const decode = jwtDecode(token);
+      console.log("token", decode);
+      setAuthenticatedUser(decode);
+    } else {
+      setAuthenticatedUser({});
+    }
+  }, []);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleAddToCart = () => {
+    console.log("selected size", choosenSize.size);
+    console.log("selected color", productData.colorName);
+    console.log("product id", productData.id);
+    if (authenticatedUser && Object.keys(authenticatedUser).length != 0) {
+      console.log("authenticated user id", authenticatedUser.id);
+      api
+        .post(
+          "/carts",
+          {
+            productSize: choosenSize.size,
+            color: productData.colorName,
+            // productId: productData.id,
+            user: authenticatedUser.id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          console.log("success", response.data);
+        })
+        .catch((error) => {
+          if (error.status == 401) {
+            console.log("unauthorized");
+            refreshToken();
+            handleAddToCart();
+          }
+        });
+    } else {
+      navigate("/login");
+      toast({ description: "You have to log in first to add to your cart." });
+    }
+  };
+
+  loading && productData && <div>Loading</div>;
+
+  return productData ? (
     <div className=" px-2 md:px-14 space-y-4  lg:m-auto">
       <Category></Category>
 
@@ -72,33 +175,39 @@ function ProductDetail() {
 
             <div className="flex flex-wrap md:flex-nowrap gap-12 md:gap-28 justify-between  ">
               <div className="left flex flex-col gap-2 justify-betwen ">
-                <ProductImage size="lg" src={product.heroImageSrc} />
+                <ProductImage
+                  className="w-full h-full"
+                  size="lg"
+                  src={heroImage}
+                />
                 <div className="bottom flex gap-2">
-                  {product.images.map((src, index) => (
-                    <ProductImage
-                      key={index}
-                      size="sm"
-                      isActive={product.heroImageSrc === src}
-                      src={src}
-                      onClick={product.setHeroImageSrc}
-                    />
-                  ))}
+                  {productData &&
+                    productData.images &&
+                    productData.images.map((productImage, index) => (
+                      <ProductImage
+                        key={index}
+                        size="sm"
+                        isActive={heroImage === productImage.imageUrl}
+                        src={productImage.imageUrl}
+                        onClick={() => setHeroImage(productImage.imageUrl)}
+                      />
+                    ))}
                 </div>
               </div>
               <div className="right space-y-4 grow">
                 <UserProfile
                   src="/users/current_user.jpg"
-                  username={product.seller.name}
+                  username={productData && productData.owner}
                   activeStatus={product.seller.activeStatus}
                 ></UserProfile>
                 <div className="title-rating">
                   <h2 className="text-md md:text-2xl font-semibold ">
-                    {product.name}
+                    {productData && productData.title && productData.title}
                   </h2>
                   <Rating text="42 reviews"></Rating>
                 </div>
                 <div className=" text-xl md:text-3xl font-semibold">
-                  {product.price}
+                  {productData && productData.price && product.price}
                 </div>
                 <div className="color-section">
                   <div className="color-description-heading font-semibold text-base flex justify-between flex-wrap">
@@ -107,10 +216,12 @@ function ProductDetail() {
                       <span className="text-gray-400">
                         {" "}
                         {">"}
-                        {product.mainColor.name}
+                        {productData &&
+                          productData.colorName &&
+                          productData.colorName}
                       </span>
                     </p>
-
+                    {/* todo here */}
                     <Dialog>
                       <DialogTrigger>
                         <Button
@@ -126,43 +237,45 @@ function ProductDetail() {
                             <div className="flex gap-4">
                               <Avatar>
                                 <AvatarImage
-                                  src={product.heroImageSrc}
+                                  src={heroImage}
                                   className="w-24 h-16 object-cover rounded-lg"
                                 />
                                 <AvatarFallback>CN</AvatarFallback>
                               </Avatar>
                               <div>
                                 <p className="font-medium text-lg">
-                                  {product.name}
+                                  {productData.title}
                                 </p>
-                                <p className="">{product.price}</p>
+                                <p className="">
+                                  {productData.price && productData.price}
+                                </p>
                               </div>
                             </div>
                           </DialogTitle>
                           <DialogDescription>
-                            <p className="text-black text-base font-semibold mt-3">Product detail</p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit, sed do eiusmod tempor incididunt ut labore et
-                            dolore magna aliqua. Ut enim ad minim. Product
-                            Detail Lorem ipsum dolor sit amet, consectetur
-                            adipiscing elit, sed do eiusmod tempor incididunt ut
-                            labore et dolore magna aliqua. Ut enim ad minim.
+                            <p className="text-black text-base font-semibold mt-3">
+                              Product detail
+                            </p>
+                            {productData.description
+                              ? productData.description
+                              : "product details is not provided"}
                           </DialogDescription>
                         </DialogHeader>
                       </DialogContent>
                     </Dialog>
                   </div>
                   <div className="color-choices space-x-2 my-4">
-                    {product.colors.map((color) => (
-                      <ColorChoice
-                        key={color.name}
-                        code={color.code}
-                        color={color.name}
-                        src={color.src}
-                        isActive={product.mainColor.name === color.name}
-                        onClick={product.setMaincolor}
-                      ></ColorChoice>
-                    ))}
+                    <ColorChoice
+                      key={productData.colorName}
+                      code={productData.colorName}
+                      color={productData.colorName}
+                      src={
+                        productData &&
+                        productData.images &&
+                        productData.images[0].imageUrl
+                      }
+                      isActive={true}
+                    ></ColorChoice>
                   </div>
                 </div>
                 <div>
@@ -172,18 +285,29 @@ function ProductDetail() {
                       <span className="text-gray-400">
                         {" "}
                         {">"} EU Men {">"}
-                        {product.choosenSize.value}
+                        {choosenSize && choosenSize.size}
                       </span>
                     </p>
                   </div>
                   <div className="size-choices flex gap-3">
-                    {product.sizes.map((size) => (
-                      <SizeChoice key={size.label} size={size}></SizeChoice>
-                    ))}
+                    {productData.sizeName &&
+                      productData.sizeName &&
+                      productData.sizeName.map((size) => (
+                        <SizeChoice
+                          key={size.size}
+                          size={size}
+                          choosenSize={choosenSize}
+                          onSizeToggle={setChoosenSize}
+                          // come back
+                        ></SizeChoice>
+                      ))}
                   </div>
                 </div>
                 <div className="add-btns flex gap-4 justify-between items-center">
-                  <Button className="bg-black text-white grow px-8 py-5 text-md font-medium hover:opacity-90 hover:bg-black">
+                  <Button
+                    className="bg-black text-white grow px-8 py-5 text-md font-medium hover:opacity-90 hover:bg-black"
+                    onClick={handleAddToCart}
+                  >
                     <span className="mr-4">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -270,12 +394,18 @@ function ProductDetail() {
           <div className="flex justify-between">
             <div className="left grow md:max-w-[600px]">
               <div className="review-container space-y-3">
-              {
-                comments.map(comment => (
-                  <Comment id={comment.id} key={comment.id} username={comment.user.name} avatar={comment.user.avatar} likes={comment.likes} dislikes={comment.dislikes} subComments={comment.subComments} commentText={comment.comment}>
-                  </Comment>
-                ))
-              }
+                {comments.map((comment) => (
+                  <Comment
+                    id={comment.id}
+                    key={comment.id}
+                    username={comment.user.name}
+                    avatar={comment.user.avatar}
+                    likes={comment.likes}
+                    dislikes={comment.dislikes}
+                    subComments={comment.subComments}
+                    commentText={comment.comment}
+                  ></Comment>
+                ))}
               </div>
             </div>
             <div className="right hidden sm:flex">
@@ -306,6 +436,8 @@ function ProductDetail() {
         </div>
       </div>
     </div>
+  ) : (
+    <div>loading please wait</div>
   );
 }
 

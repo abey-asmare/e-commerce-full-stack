@@ -2,18 +2,61 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/lib/constants";
+import api from "@/lib/api";
+import { meta } from "@eslint/js";
+import { useState } from "react";
 
 export function LoginForm({ className, ...props }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    localStorage.clear();
+    setLoading(true);
+    e.preventDefault();
+    try {
+      const response = await api.post("account/login", {
+        email,
+        password,
+      });
+      localStorage.setItem(ACCESS_TOKEN, response.data.accessToken);
+      localStorage.setItem(REFRESH_TOKEN, response.data.refreshToken);
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+      console.log(error);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
-    <form action="/products/" className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+      onSubmit={handleSubmit}
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
+          {error && <div className="text-red-600 text-sm">Bad credentials</div>}
+
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
@@ -25,7 +68,14 @@ export function LoginForm({ className, ...props }) {
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" required />
+          <Input
+            id="password"
+            type="password"
+            className=" font-lg text-lg"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
         <Button type="submit" className="w-full">
           Login

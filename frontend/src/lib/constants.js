@@ -1,5 +1,5 @@
-export const ACCESS_TOKEN = "access";
-export const REFRESH_TOKEN = "refresh";
+export const ACCESS_TOKEN = "accessToken";
+export const REFRESH_TOKEN = "refreshToken";
 
 export const COUNTRIES = ["ethiopia", "usa"];
 

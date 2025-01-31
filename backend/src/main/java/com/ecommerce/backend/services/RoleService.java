@@ -1,6 +1,7 @@
 package com.ecommerce.backend.services;
 
 import com.ecommerce.backend.models.Role;
+import com.ecommerce.backend.models.User;
 import com.ecommerce.backend.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -26,4 +26,8 @@ public class ProductSizeService {
     public List<ProductSize> getAll() {
         return sizeRepository.findAll();
     }
+
+    public ProductSize findById(Long id) {
+        return sizeRepository.findById(id).orElseThrow(()-> new RuntimeException("product size doens't exist"));
+    }
 }

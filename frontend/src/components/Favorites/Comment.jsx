@@ -14,10 +14,10 @@ function Comment({
   rating,
   commentText,
   ...props
-}) {  
-  const {openCommentId, setOpenCommentId} = useCommentStore();
-  const likeReview = useProductStore(state => state.likeReview)
-  const likeSubComment = useProductStore(state => state.likeSubComment)
+}) {
+  const { openCommentId, setOpenCommentId } = useCommentStore();
+  const likeReview = useProductStore((state) => state.likeReview);
+  const likeSubComment = useProductStore((state) => state.likeSubComment);
 
   return (
     <div className="main-comment space-y-4">
@@ -35,16 +35,18 @@ function Comment({
             <Button
               variant="link"
               className="font-medium text-[#AA8B15] px-0"
-              onClick = {()=> setOpenCommentId(props.id)}
+              onClick={() => setOpenCommentId(props.id)}
             >
               Reply
             </Button>
-            <div className="font-semibold flex items-end" onClick={()=>{
-              props.isSubComment ? 
-              likeSubComment(props.reviewId, props.id):
-
-              likeReview(props.id)
-            }}>
+            <div
+              className="font-semibold flex items-end"
+              onClick={() => {
+                props.isSubComment
+                  ? likeSubComment(props.reviewId, props.id)
+                  : likeReview(props.id);
+              }}
+            >
               <Icon classname={"thumbs-up"}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -84,31 +86,35 @@ function Comment({
               {dislikes > 0 && dislikes}
             </div>
           </div>
-          { openCommentId == props.id && 
-
-          <div className="flex gap-2">
-            <Textarea placeholder="your comment here "></Textarea>
-            <Button className="text-white bg-black hover:opacity-90">
-              Send{" "}
-            </Button>
-          </div>
-          }
+          {openCommentId == props.id && (
+            <div className="flex gap-2">
+              <Textarea placeholder="your comment here "></Textarea>
+              <Button
+                className="text-white bg-black hover:opacity-90"
+                onClick={() => {
+                  console.log("parentid");
+                }}
+              >
+                Send{" "}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       {props.subComments && (
         <div className="sub-comments pl-10 space-y-5">
-          {props.subComments.map(comment => (
+          {props.subComments.map((comment) => (
             <Comment
-            id={comment.id}
-            key={comment.id}
-            username={comment.user.name}
-            avatar={comment.user.avatar}
-            likes={comment.likes}
-            dislikes={comment.dislikes}
-            isSubComment = {true}
-            commentText={comment.comment}
-            reviewId={props.id}
-          ></Comment>
+              id={comment.id}
+              key={comment.id}
+              username={comment.user.name}
+              avatar={comment.user.avatar}
+              likes={comment.likes}
+              dislikes={comment.dislikes}
+              isSubComment={true}
+              commentText={comment.comment}
+              reviewId={props.id}
+            ></Comment>
           ))}
         </div>
       )}

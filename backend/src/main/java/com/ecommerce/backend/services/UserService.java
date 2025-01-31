@@ -2,12 +2,16 @@ package com.ecommerce.backend.services;
 
 
 import com.ecommerce.backend.DTOs.UserRegistrationDto;
+import com.ecommerce.backend.models.Profile;
 import com.ecommerce.backend.models.Role;
 import com.ecommerce.backend.models.User;
 import com.ecommerce.backend.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +30,7 @@ public class UserService {
 
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder  passwordEncoder;
 
     @Autowired
     ModelMapper modelMapper;
@@ -59,7 +63,8 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(()-> new RuntimeException("User not found with name: " + id));
     }
 
-//    public Boolean isAdmin(User user){
-//        return Objects.equals(user.getRole().getName(), "USER_ADMIN");
-//    }
+
+
+
+
 }

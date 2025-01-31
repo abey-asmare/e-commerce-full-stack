@@ -2,10 +2,47 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "@/lib/api";
 
 export function RegisterForm({ className, ...props }) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    setLoading(true);
+    e.preventDefault();
+    localStorage.clear();
+
+    try {
+      const response = await api.post("account/register", {
+        firstName,
+        lastName,
+        email,
+        password,
+      });
+      navigate("/login");
+    } catch (err) {
+      setError(err);
+      console.log(error);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form className={cn("flex flex-col gap-6 mt-8", className)} {...props}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn("flex flex-col gap-6 mt-8", className)}
+      {...props}
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Register to your account</h1>
       </div>
@@ -13,21 +50,38 @@ export function RegisterForm({ className, ...props }) {
         <div className="flex gap-2">
           <div className="grid gap-2">
             <Label htmlFor="firstname">First Name</Label>
-            <Input id="firstname" type="text" placeholder="Jhon" required />
+            <Input
+              id="firstname"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              type="text"
+              placeholder="Jhon"
+              required
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="lastname">Last Name</Label>
-            <Input id="lastname" type="text" placeholder="Doe" required />
+            <Input
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              id="lastname"
+              type="text"
+              placeholder="Doe"
+              required
+            />
           </div>
         </div>
 
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input id="phone" type="number" placeholder="0900010203" required />
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            required
+          />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
@@ -39,7 +93,13 @@ export function RegisterForm({ className, ...props }) {
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" required />
+          <Input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            id="password"
+            type="password"
+            required
+          />
         </div>
         <Button type="submit" className="w-full">
           Register

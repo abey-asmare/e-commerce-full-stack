@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 
 import ProductDetail from "@/components/ProductDetail";
@@ -8,14 +8,46 @@ import ProductForm from "./ProductForm";
 import Register from "./Register";
 import LandingPage from "./LandingPage";
 import ProductListings from "./ProductListings";
+import LoginRegister from "./LoginRegister";
+import { useEffect } from "react";
+import Profile from "./Profile";
+import { useAuthStore } from "@/store/AuthStore";
+import { Toaster } from "@/components/ui/toaster";
+
+function Logout() {
+  localStorage.clear();
+  const { isAuthorized, setIsAuthorized, userInfo, decodeUserInfo } =
+    useAuthStore();
+  useEffect(() => {
+    decodeUserInfo();
+    if (userInfo !== null && Object.keys(userInfo).length !== 0)
+      setIsAuthorized(false);
+    setIsAuthorized(true);
+  }, [decodeUserInfo, isAuthorized]);
+
+  return <Navigate to="/login" />;
+}
 
 function App() {
+  const { isAuthorized } = useAuthStore();
+  useEffect(() => {
+    console.log(isAuthorized);
+  }, []);
+
   return (
     <BrowserRouter>
+      <Toaster></Toaster>
       <Navbar></Navbar>
       <Routes>
-        {/* <Route path="/test" element={<TestProducts></TestProducts>}></Route> */}
         <Route path="/" element={<LandingPage></LandingPage>}></Route>
+        <Route
+          path="/lr"
+          element={
+            <ProtectedRoute>
+              <LoginRegister />
+            </ProtectedRoute>
+          }
+        ></Route>
         <Route
           path="/products"
           element={<ProductListings></ProductListings>}
@@ -29,8 +61,17 @@ function App() {
         <Route
           path="/products/:id"
           element={
+            // <ProtectedRoute>
+            <ProductDetail></ProductDetail>
+            // </ProtectedRoute>
+          }
+        ></Route>
+        <Route path="/logout" element={<Logout />}></Route>
+        <Route
+          path="/profile/:id"
+          element={
             <ProtectedRoute>
-              <ProductDetail></ProductDetail>
+              <Profile />
             </ProtectedRoute>
           }
         ></Route>

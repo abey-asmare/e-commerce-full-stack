@@ -16,13 +16,13 @@ export function HeroSection() {
           From Vibrant Prints To White Quotes And Minimalist Designs, Our Tees Are Made For The Fearless, Unapologetic You. Wear It Own It.
         </p>
         <div>
-          <Button onClick={()=> navigate("/products")} className="bg-black text-white hover:bg-black/90">
+          <Button onClick={()=> navigate("/products")} className="bg-black cursor-pointer text-white hover:bg-black/90">
             Start Shopping
           </Button>
         </div>
       </div>
       <div className="relative aspect-[4/3] md:aspect-[16/10]">
-        <img src="/images/hero-image.png"
+        <img src="/images/hero-image.png" 
           alt="Two people wearing white t-shirts"
 
           className="object-cover rounded-2xl" />

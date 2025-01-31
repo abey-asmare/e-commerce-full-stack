@@ -78,7 +78,7 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
                                                Pageable pageable) {
     Page<Product> products;
     if (sortBy == null || sortBy.isEmpty()) {
-    sortBy = "Newest"; // Default sorting
+    sortBy = "newest"; // Default sorting
 }
 
     Sort sort = switch (sortBy) {
@@ -112,33 +112,44 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
     });
 }
 
+@Transactional
 
     public ProductDetailResponseDto getProductDetail(Long productId) {
+
+
+    String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+
         Optional<Product> productOpt = productRepository.findById(productId);
         if (productOpt.isEmpty()) {
-            throw new RuntimeException("Product not found"); // Or handle with a custom exception
+            throw new RuntimeException("Product not found");
         }
         Product product = productOpt.get();
 
         // Map Product to ProductDetailResponseDto
         ProductDetailResponseDto responseDto = modelMapper.map(product, ProductDetailResponseDto.class);
 
-        responseDto.setImages(product.getImages().stream()
-                .map((image) -> modelMapper.map(image, ProductImageResponseDto.class))
-                .collect(Collectors.toList()));
+
+        List<ProductImageResponseDto> imageDtos = product.getImages().stream()
+                .map(image -> {
+                    ProductImageResponseDto imageDto = new ProductImageResponseDto();
+                    imageDto.setId(image.getId());
+                    imageDto.setImageUrl(baseUrl + image.getImageUrl());
+                    return imageDto;
+                })
+                .toList();
 
         responseDto.setRelatedProducts(product.getRelatedProducts().stream()
                 .map(relatedProduct -> modelMapper.map(relatedProduct, RelatedProductResponseDto.class) )
                 .collect(Collectors.toSet()));
 
-        responseDto.setComments(product.getComments().stream()
-                .map(comment -> modelMapper.map(comment, CommentResponseDto.class))
-                .collect(Collectors.toSet()));
-
+//        responseDto.setComments(product.getComments().stream()
+//                .map(comment -> modelMapper.map(comment, CommentResponseDto.class))
+//                .collect(Collectors.toList()));
+        responseDto.setSizeName(product.getSizes() != null ? product.getSizes(): null);
         responseDto.setOwner(product.getOwner().getUsername());
         responseDto.setColorName(product.getColor() != null ? product.getColor().getName() : null);
         responseDto.setProductTypeName(product.getProductType() != null ? product.getProductType().getType() : null);
-        responseDto.setSizeName(product.getSizes() != null ? product.getSizes(): null);
+        responseDto.setImages(imageDtos);
 
         return responseDto;
     }
@@ -154,7 +165,7 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
 
 //    create products
 @Transactional
-public void createProduct(ProductRequestDto requestDto, List<MultipartFile> images) {
+public ProductResponseDto createProduct(ProductRequestDto requestDto, List<MultipartFile> images) {
 
     // Fetch and validate related entities
     User owner = userService.findById(1L); // Hardcoded admin user
@@ -188,8 +199,8 @@ public void createProduct(ProductRequestDto requestDto, List<MultipartFile> imag
     product.setSizes(sizes);
 
     product = productRepository.save(product);
-//    log.info("Product created with ID: {}", product.getId());
-    System.out.println("product created successfully");
+
+
     // Save images
     if (images != null && !images.isEmpty()) {
         saveProductImages(product, images);
@@ -199,6 +210,9 @@ public void createProduct(ProductRequestDto requestDto, List<MultipartFile> imag
     if (requestDto.getRelatedProductIds() != null && !requestDto.getRelatedProductIds().isEmpty()) {
 //        saveRelatedProducts(product, requestDto.getRelatedProductIds());
     }
+
+    System.out.println("product created successfully");
+    return modelMapper.map(product, ProductResponseDto.class);
 }
 
 private void saveProductImages(Product product, List<MultipartFile> images) {

@@ -1,5 +1,7 @@
 package com.ecommerce.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -20,5 +22,6 @@ public class ProductSize {
     private String size;
 
     @ManyToMany(mappedBy = "sizes")
+    @JsonIgnore
     private Set<Product> products = new HashSet<>();
 }

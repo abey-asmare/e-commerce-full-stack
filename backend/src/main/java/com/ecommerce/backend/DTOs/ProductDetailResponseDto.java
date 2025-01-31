@@ -22,5 +22,5 @@ public class ProductDetailResponseDto {
     private List<ProductSize> sizeName;
     private List<ProductImageResponseDto> images;
     private Set<RelatedProductResponseDto> relatedProducts;
-    private Set<CommentResponseDto> comments;
+    private List<CommentResponseDto> comments;
 }

@@ -1,5 +1,7 @@
 package com.ecommerce.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -10,6 +12,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -48,16 +51,20 @@ public class User {
     private Profile profile;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonManagedReference
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Set<Comment> comments = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Favorites> favorites = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private Set<Cart> carts = new HashSet<>();
 
     @CreationTimestamp
@@ -92,5 +99,37 @@ public class User {
                 ", lastname='" + lastname + '\'' +
                 '}';
     }
+
+public String getProfileAvatar() {
+    String avatarPath = (this.getProfile() == null || this.getProfile().getAvatar() == null)
+        ? "images/profiles/default_profile_picture.jpg"
+        :  this.getProfile().getAvatar();
+
+    return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/" + avatarPath;
+}
+
+public String getLocation(){
+        if(this.getProfile() == null || this.getProfile().getLocation() == null){
+            return "";
+        }
+        return this.getProfile().getLocation();
+
+}
+
+public String getPhone(){
+        if(this.getProfile() == null || this.getProfile().getPhone() == null){
+            return "";
+        }
+        return this.getProfile().getPhone();
+
+}
+
+public String getBio(){
+        if(this.getProfile() == null || this.getProfile().getBio() == null){
+            return "";
+        }
+        return this.getProfile().getBio();
+
+}
 }
 

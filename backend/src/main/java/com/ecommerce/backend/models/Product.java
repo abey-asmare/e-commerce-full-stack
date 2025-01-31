@@ -1,6 +1,7 @@
 package com.ecommerce.backend.models;
 
 import com.ecommerce.backend.DTOs.ProductImageResponseDto;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +37,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
+    @JsonManagedReference
     private User owner;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -64,7 +66,8 @@ public class Product {
 
 
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonBackReference
     private Set<Comment> comments = new HashSet<>();
 
     @Column(columnDefinition = "integer default 1",  nullable = false)
