@@ -41,7 +41,13 @@ public class ProductService {
     private  UserService userService;
 
     @Autowired
+    private ProductService productService;
+
+    @Autowired
     private ProductTypeService productTypeService;
+
+    @Autowired
+    private ImageService imageService;
 
     @Autowired
     private ColorService colorService;
@@ -119,11 +125,7 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
 
     String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
-        Optional<Product> productOpt = productRepository.findById(productId);
-        if (productOpt.isEmpty()) {
-            throw new RuntimeException("Product not found");
-        }
-        Product product = productOpt.get();
+        Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("product not found"));
 
         // Map Product to ProductDetailResponseDto
         ProductDetailResponseDto responseDto = modelMapper.map(product, ProductDetailResponseDto.class);
@@ -147,9 +149,12 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
 //                .collect(Collectors.toList()));
         responseDto.setSizeName(product.getSizes() != null ? product.getSizes(): null);
         responseDto.setOwner(product.getOwner().getUsername());
+        responseDto.setOwnerId(product.getOwner().getId());
         responseDto.setColorName(product.getColor() != null ? product.getColor().getName() : null);
         responseDto.setProductTypeName(product.getProductType() != null ? product.getProductType().getType() : null);
         responseDto.setImages(imageDtos);
+        responseDto.setGender(product.getGender().getName());
+        responseDto.setPrice(product.getPrice());
 
         return responseDto;
     }
@@ -164,11 +169,12 @@ public Page<ProductResponseDto> getAllProducts(String productSize,
 
 
 //    create products
+
 @Transactional
 public ProductResponseDto createProduct(ProductRequestDto requestDto, List<MultipartFile> images) {
 
     // Fetch and validate related entities
-    User owner = userService.findById(1L); // Hardcoded admin user
+    User owner = userService.findById(requestDto.getOwner());
     Color color = colorService.findByName(requestDto.getColorName());
     ProductType productType = productTypeService.findByName(requestDto.getProductTypeName());
     Gender gender = genderService.findByName(requestDto.getGender());
@@ -188,12 +194,12 @@ public ProductResponseDto createProduct(ProductRequestDto requestDto, List<Multi
     product.setGender(gender);
     product.setPrice(requestDto.getPrice());
     product.setDescription(requestDto.getDescription());
-    System.out.println(requestDto);
     if(requestDto.getAvailableQuantity() == null || requestDto.getAvailableQuantity() <=0)
         product.setAvailableQuantity(1);
     product.setAvailableQuantity(requestDto.getAvailableQuantity());
     product.setDiscountedPercentage(0);
     product.setOwner(owner);
+    product.setGender(gender);
     product.setColor(color);
     product.setProductType(productType);
     product.setSizes(sizes);
@@ -248,6 +254,51 @@ private void saveProductImages(Product product, List<MultipartFile> images) {
 
     public Long countProducts(){
         return productRepository.count();
+    }
+
+    @Transactional
+public ProductResponseDto updateProduct(Long id, ProductRequestDto requestDto, List<MultipartFile> images) {
+    // Fetch and validate related entities
+    Color color = colorService.findByName(requestDto.getColorName());
+    ProductType productType = productTypeService.findByName(requestDto.getProductTypeName());
+    Gender gender = genderService.findByName(requestDto.getGender());
+
+    // Validate and map sizes
+    List<ProductSize> sizes = requestDto.getSizeNames().stream()
+        .map(size -> productSizeService.findBySize(size))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+    if (sizes.isEmpty()) {
+        throw new RuntimeException("Invalid size names provided");
+    }
+
+    // Update the product
+    Product product = productService.findById(id);
+    product.setTitle(requestDto.getTitle());
+    product.setGender(gender);
+    product.setPrice(requestDto.getPrice());
+    product.setDescription(requestDto.getDescription());
+    product.setAvailableQuantity((requestDto.getAvailableQuantity() == null || requestDto.getAvailableQuantity() <= 0) ? 1 : requestDto.getAvailableQuantity());
+    product.setDiscountedPercentage((requestDto.getDiscountPercentage() == null || requestDto.getDiscountPercentage() <= 0) ? 0 : requestDto.getDiscountPercentage());
+    product.setColor(color);
+    product.setProductType(productType);
+    product.setSizes(sizes);
+
+    product.getImages().clear();
+        productRepository.save(product);
+
+        // Save images
+    if (images != null && !images.isEmpty()) {
+        saveProductImages(product, images);
+    }
+
+
+    System.out.println("Product updated successfully");
+    return modelMapper.map(product, ProductResponseDto.class);
+}
+
+    public void deleteProduct(Long id){
+        productRepository.deleteById(id);
     }
 
 }

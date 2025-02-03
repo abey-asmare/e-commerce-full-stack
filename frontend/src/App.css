@@ -1,18 +1,31 @@
-.Card-div{
-    width: "100px";
-    height:"150px";
+.Card-div {
+  width: "100px";
+  height: "150px";
+}
+.Card-img {
+  display: "block";
+  width: "230px";
+  height: "230px";
+}
+.Card-p-JustIn {
+  color: "#9E3500";
+}
+.Card-p-mens {
+  color: "#737373";
+}
+.Card-p-numColor {
+  color: "#737373";
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
   }
-  .Card-img{
-    display:"block";
-    width: "230px";
-    height:"230px"
+  100% {
+    opacity: 1;
   }
-  .Card-p-JustIn{
-    color:"#9E3500";
-  }
-  .Card-p-mens{
-    color:"#737373";
-  }
-  .Card-p-numColor{
-    color:"#737373";
-  }
+}
+
+.hover-image {
+  animation: fadeIn 1s ease-in-out 0.2s both; /* 0.3s duration with 0.2s delay */
+}

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Upload, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,12 @@ import {
 import { cn } from "@/lib/utils";
 import SizeChoice from "@/components/Favorites/SizeChoice";
 import UserProfile from "@/components/Favorites/UserProfile";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "@/lib/api";
+import { useAuthStore } from "@/store/AuthStore";
+import { ACCESS_TOKEN } from "@/lib/constants";
+import axios from "axios";
+import { toast } from "@/hooks/use-toast";
 
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
@@ -43,6 +48,14 @@ const COLORS = [
   { name: "pink", class: "bg-pink-500", hex: "#EC4899" },
 ];
 
+const AVAILABLE_SIZES = [
+  { label: "Sm", value: "small" },
+  { label: "Md", value: "medium" },
+  { label: "Lg", value: "large" },
+  { label: "Xl", value: "xlarge" },
+  { label: "XXL", value: "xxlarge" },
+];
+
 export default function ProductForm() {
   const [formData, setFormData] = useState({
     title: "",
@@ -52,7 +65,63 @@ export default function ProductForm() {
     delivery: "",
     colors: [],
     price: "",
+    discountedPrice: "",
   });
+
+  const param = useParams();
+
+
+  const { refreshToken, userInfo } = useAuthStore();
+  console.log(userInfo);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get(`/products/${param.id}`);
+        console.log(response.data);
+
+        // Set form data
+        setFormData((prev) => ({
+          ...prev,
+          title: response.data.title,
+          description: response.data.description,
+          gender: response.data.gender,
+          productType: response.data.productTypeName,
+          colors: [response.data.colorName],
+          price: response.data.price,
+        }));
+
+        // Fetch images properly
+        const colorName = response.data.colorName;
+        const images =
+          response.data.images.map((image) => image.imageUrl) || [];
+
+        // Convert URLs to File objects
+        const imageFiles = await Promise.all(
+          response.data.images.map(async (image) => {
+            const response = await fetch(image.imageUrl);
+            const blob = await response.blob(); // Fetch the actual binary data
+            return new File([blob], image.imageName || "image.jpg", {
+              type: blob.type || "image/jpeg",
+            });
+          })
+        );
+
+        setColorData((prev) => ({
+          ...prev,
+          [colorName]: {
+            ...prev[colorName],
+            images: images,
+            imageFiles: imageFiles,
+          },
+        }));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if (param.id) fetchProducts();
+  }, [param.id]);
 
   const [colorData, setColorData] = useState({});
   const [errors, setErrors] = useState({});
@@ -61,23 +130,8 @@ export default function ProductForm() {
 
   const navigate = useNavigate();
 
-  const handleSizeToggle = useCallback((color, size) => {
-    console.log("handleSizeToggle called:", color, size.value);
-    setChoosenSize((prevSizes) => {
-      const updatedSizes = { ...prevSizes };
-      if (!updatedSizes[color]) {
-        updatedSizes[color] = [];
-      }
-      if (updatedSizes[color].includes(size.label)) {
-        updatedSizes[color] = updatedSizes[color].filter(
-          (s) => s !== size.label
-        );
-      } else {
-        updatedSizes[color].push(size.label);
-      }
-      console.log("Updated choosenSize:", updatedSizes);
-      return updatedSizes;
-    });
+  const handleSizeToggle = useCallback((color) => {
+    setChoosenSize(color);
   }, []);
 
   const validateImage = (file) => {
@@ -147,12 +201,11 @@ export default function ProductForm() {
       ...prev,
       [color]: {
         ...prev[color],
-        images: [...prev[color].images, ...validFileUrls],
-        imageFiles: [...prev[color].imageFiles, ...validFiles],
+        images: [...(prev[color]?.images || []), ...validFileUrls],
+        imageFiles: [...(prev[color]?.imageFiles || []), ...validFiles],
       },
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
@@ -171,10 +224,9 @@ export default function ProductForm() {
         validationErrors[field] = `${
           field.charAt(0).toUpperCase() + field.slice(1)
         } is required`;
+      } else {
+        formDataToSend.append(field, formData[field]);
       }
-      // else {
-      //   formDataToSend.append(field, formData[field]);
-      // }
     });
 
     // Validate colors
@@ -190,11 +242,12 @@ export default function ProductForm() {
             `${color}_sizes`
           ] = `At least one size must be selected for ${color}`;
         } else {
-          // formDataToSend.append(`colors`, color);
-          // formDataToSend.append(
-          //   `${color}_sizes`,
-          //   JSON.stringify(choosenSize[color])
-          // );
+          formDataToSend.append(`colors`, color);
+          formDataToSend.append("owner", userInfo.id);
+          formDataToSend.append(
+            `${color}_sizes`,
+            JSON.stringify(choosenSize[color])
+          );
         }
 
         // Validate and append images (max 4)
@@ -207,9 +260,9 @@ export default function ProductForm() {
             `${color}_images`
           ] = `Maximum of 4 images allowed for ${color}`;
         } else {
-          // colorInfo.imageFiles.forEach((file) => {
-          // formDataToSend.append(`${color}_images`, file);
-          // });
+          colorInfo.imageFiles.forEach((file) => {
+            formDataToSend.append(`${color}_images`, file);
+          });
         }
       });
     }
@@ -223,43 +276,89 @@ export default function ProductForm() {
 
     // Clear any previous errors
     setErrors({});
-    formDataToSend.append("title", formData.title);
     formData.description &&
       formDataToSend.append("description", formData.description);
-    formDataToSend.append("gender", formData.gender);
     formDataToSend.append("colorName", formData.colors[0]);
     formDataToSend.append("productTypeName", formData.productType);
-    formDataToSend.append("availableQuantity", Number(10));
-    choosenSize[formData.colors[0]].forEach((size) => {
-      formDataToSend.append("sizeNames", size.toLowerCase());
-    });
+    formDataToSend.append("availableQuantity", 10);
+    formDataToSend.append("sizeNames", [choosenSize.size]);
     colorData[formData.colors[0]].imageFiles.forEach((file) => {
       formDataToSend.append("images", file);
     });
     formDataToSend.append("price", Number(formData.price));
 
+    if (param.id) {
+      await updateProduct(formDataToSend);
+    } else {
+      await createProduct(formDataToSend);
+    }
+  };
+
+  const updateProduct = async (formDataToSend) => {
+    formDataToSend.append("discountedPrice", formData.discountedPrice);
+    formDataToSend.delete("price");
+    formDataToSend.append(
+      "price",
+      Math.round(
+        Number(formData.price) * 1 -
+          (Number(formData.price) * Number(formData.discountedPrice)) / 100
+      )
+    );
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/api/v1/products/${Number(param.id)}`,
+        formDataToSend, // Use the FormData object directly
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // This is fine for FormData
+            Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          },
+        }
+      );
+
+      console.log("Product updated:", response.data);
+      navigate(`/products/${response.data.id}`);
+      console.log("Product updated successfully");
+    } catch (error) {
+      toast({ description: "error creating the product. please try again" });
+      if (error.response) {
+        if (error.response.status === 401) {
+          refreshToken();
+        }
+        console.error("Error updating product:", error.response.data);
+        setErrors({ submit: error.response.data.message || "Update failed" });
+      } else {
+        console.error("Unexpected error:", error.message);
+      }
+    }
+  };
+
+  const createProduct = async (formDataToSend) => {
     for (const [key, value] of formDataToSend.entries()) {
       console.log(key, value);
     }
     try {
-      const response = await fetch("http://localhost:8080/api/v1/products", {
-        method: "POST",
-        body: formDataToSend,
-      });
+      const response = await api.post(
+        "http://localhost:8080/api/v1/products",
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          },
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create product");
-      }
-
-      const product = await response.json();
+      const product = response.data;
       console.log(product);
       navigate(`/products/${product.id}`);
-
       console.log("Product created successfully");
-
-      // Handle success (e.g., show success message, redirect)
     } catch (error) {
+      console.log(error);
+      toast({ description: "error creating the product. please try again" });
+      if (error.response && error.response.status === 401) {
+        refreshToken();
+      }
       console.error("Error creating product:", error);
       setErrors({ submit: error.message });
     }
@@ -267,7 +366,13 @@ export default function ProductForm() {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 space-y-8">
-      <UserProfile username="Abey asmare" isOwner={true}></UserProfile>
+      
+      <UserProfile
+        username={userInfo && userInfo.firstName + " " + userInfo.lastName}
+        src={userInfo && userInfo.profile}
+        isOwner={true}
+        userId={userInfo.id}
+      ></UserProfile>
 
       <div className="space-y-6">
         <div>
@@ -511,31 +616,63 @@ export default function ProductForm() {
 
             <div className="space-y-4">
               <h4 className="font-medium">{formData.title}</h4>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  placeholder="Price"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, price: e.target.value }))
-                  }
-                  className="w-48"
-                />
-                <span>Birr</span>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Price"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        price: e.target.value,
+                      }))
+                    }
+                    className="w-48"
+                  />
+                  <span>Birr</span>
+                </div>
+                {errors.price && (
+                  <p className="text-red-500 text-sm">{errors.price}</p>
+                )}
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="Discount"
+                    value={formData.discountedPrice}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        discountedPrice: e.target.value,
+                      }))
+                    }
+                    className="w-48"
+                  />
+                  <span>discount in %</span>
+                </div>
               </div>
-              {errors.price && (
-                <p className="text-red-500 text-sm">{errors.price}</p>
+              {formData.discountedPrice && formData.discountedPrice <= 100 && (
+                <p className="text-red-500 text-sm">
+                  Price after discount:{" "}
+                  {Math.round(
+                    formData.price -
+                      (formData.price * formData.discountedPrice) / 100
+                  )}
+                </p>
               )}
 
               <div className="space-y-2">
                 <Label>Size</Label>
                 <div className="flex gap-2">
                   {[
-                    { label: "Sm", value: "small" },
-                    { label: "Md", value: "medium" },
-                    { label: "Lg", value: "large" },
-                    { label: "Xl", value: "xlarge" },
-                    { label: "XXL", value: "xxlarge" },
+                    { size: "sm", id: 1 },
+                    { size: "md", id: 2 },
+                    { size: "lg", id: 3 },
+                    { size: "xl", id: 4 },
+                    { size: "xxl", id: 5 },
                   ].map((size) => (
                     <SizeChoice
                       size={size}

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import "./styles.css";
 import Category from "@/components/Category";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useProductListingStore } from "@/store/ProductListingStore";
 import LargeProductCard from "@/components/ProductListings/LargeProductCard";
 import { useFilterSheetStore } from "@/store/store";
@@ -22,6 +22,8 @@ function ProductListings() {
   } = useProductListingStore();
   const { filters, prepareFiltersForProducts, extractSelectedFilters } =
     useFilterSheetStore();
+
+    const [showProduct, setShowProduct] = useState({});
 
   useEffect(() => {
     const appliedFilters = prepareFiltersForProducts();
@@ -83,6 +85,8 @@ function ProductListings() {
             }
           >
             <LargeProductCard
+            showProduct={showProduct}
+            setShowProduct={setShowProduct}
               key={index}
               product={product}
               skeleton={false}

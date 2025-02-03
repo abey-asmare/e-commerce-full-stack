@@ -1,5 +1,6 @@
 package com.ecommerce.backend.repositories;
 
+import com.ecommerce.backend.models.Product;
 import com.ecommerce.backend.models.ProductImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,5 +11,7 @@ public interface ImageRepository extends JpaRepository<ProductImage, Long> {
     List<ProductImage> findByProductId(Long productId);
 
     boolean findByImageUrlContains(String pattern);
+
+    void deleteAllByProduct(Product Product);
 
 }

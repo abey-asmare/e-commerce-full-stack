@@ -3,9 +3,11 @@ package com.ecommerce.backend.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.beans.FeatureDescriptor;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,7 +35,7 @@ public class Cart {
     private Color color;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn
     @JsonManagedReference
     private ProductSize productSize;
 

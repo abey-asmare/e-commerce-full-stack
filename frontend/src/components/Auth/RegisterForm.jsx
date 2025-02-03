@@ -27,6 +27,7 @@ export function RegisterForm({ className, ...props }) {
         email,
         password,
       });
+      decodeUserInfo();
       navigate("/login");
     } catch (err) {
       setError(err);

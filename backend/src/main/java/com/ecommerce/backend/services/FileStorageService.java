@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Normalizer;
@@ -74,4 +75,20 @@ public class FileStorageService {
                 .replaceAll("[^\\w.-]", ""); // Keep letters, numbers, dashes, and dots
         return sanitized;
     }
+
+    public void deleteImage(String imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty()) return;
+
+    // Extract file name from URL
+    String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+    Path filePath = Paths.get(uploadDir).resolve(fileName);
+
+    try {
+        Files.deleteIfExists(filePath);
+    } catch (IOException e) {
+        System.out.println("Error deleting file: " + fileName);
+    }
+}
+
+
 }

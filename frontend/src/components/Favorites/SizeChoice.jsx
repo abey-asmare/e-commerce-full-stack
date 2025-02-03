@@ -2,16 +2,17 @@ import PropTypes from "prop-types";
 import { Toggle } from "@radix-ui/react-toggle";
 
 function SizeChoice({ size, choosenSize, onSizeToggle }) {
-  const isSelected = choosenSize == size;
+  console.log("in size", size, choosenSize);
+  const isSelected = (choosenSize && choosenSize.size == size.size) || null;
 
   const handleClick = (e) => {
-    console.log("SizeChoice clicked:", size);
-    onSizeToggle(size);
+    console.log("SizeChoice clicked:", size, choosenSize);
+    onSizeToggle(size, choosenSize);
   };
 
   return (
     <Toggle
-      className={`flex items-center border border-gray-400 py-3 h-10 hover:text-black hover:border-black px-6 rounded-none text-base font-semibold ${
+      className={`flex items-center border border-gray-400 py-3 h-10 hover:text-black hover:border-black hover:bg-white px-6 rounded-none text-base font-semibold ${
         isSelected ? "bg-[#1A1A1D] text-white" : "bg-transparent text-gray-500"
       }`}
       onClick={handleClick}
@@ -24,8 +25,8 @@ function SizeChoice({ size, choosenSize, onSizeToggle }) {
 
 SizeChoice.propTypes = {
   size: PropTypes.shape({
-    label: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    size: PropTypes.string.isRequired,
   }).isRequired,
   choosenSize: PropTypes.object.isRequired,
   onSizeToggle: PropTypes.func.isRequired,

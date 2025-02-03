@@ -36,14 +36,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/chat-websocket/**", "/topic/**").permitAll()
                      .requestMatchers("/images/**").permitAll()
                     .requestMatchers("/static/**").permitAll()
+                    .requestMatchers("/actuator/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/products").permitAll()
                     .requestMatchers(HttpMethod.GET,  "/api/v1/products/**").permitAll()
-                    .requestMatchers("/store/**").permitAll()
+                    .requestMatchers("/api/v1/products/load").permitAll()
                     .requestMatchers("/api/v1/account/refresh-token").permitAll()
                     .requestMatchers("/api/v1/account/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/profiles/**").authenticated()
+                    .requestMatchers(HttpMethod.POST,"/api/v1/profiles/**").authenticated()
+                    .requestMatchers("/api/v1/carts/").authenticated()
                     .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
@@ -55,7 +58,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(List.of("http://localhost:5173"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     configuration.setAllowCredentials(true);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

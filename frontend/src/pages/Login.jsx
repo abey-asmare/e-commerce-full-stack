@@ -5,7 +5,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 import LandingPage from "./LandingPage";
 
 export default function LoginPage() {
-
   if (localStorage.getItem(REFRESH_TOKEN)) {
     const refreshToken = jwtDecode(localStorage.getItem(REFRESH_TOKEN));
     const tokenExp = refreshToken.exp;

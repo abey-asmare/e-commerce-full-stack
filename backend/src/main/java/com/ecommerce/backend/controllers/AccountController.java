@@ -181,7 +181,7 @@ public ResponseEntity<Object> refreshToken(@RequestBody HashMap<String, String> 
                 .claim("bio", appUser.getBio())
                 .claim("email", appUser.getEmail())
                 .claim("id", appUser.getId())
-                .claim("carts", appUser.getCarts())
+//                .claim("carts", appUser.getCarts())
                 .claim("favorites", appUser.getFavorites())
                 .claim("isAdmin", appUser.isAdmin())
                 .claim("firstName", appUser.getFirstname())

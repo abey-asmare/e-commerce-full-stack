@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public class CartRequestDto {
     private Long user;
 
-//    private Long productId; // map manuallyl
+    private Long product; // map manuallyl
     private String color;
     private String productSize;
 }

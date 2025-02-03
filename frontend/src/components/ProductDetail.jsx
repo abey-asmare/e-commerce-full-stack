@@ -29,11 +29,12 @@ import Comment from "./Favorites/Comment";
 import { useProductStore } from "@/store/store";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
+import api, { deleteProducts } from "@/lib/api";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN } from "@/lib/constants";
 import { useAuthStore } from "@/store/AuthStore";
+import { Edit, Trash } from "lucide-react";
 
 function ProductDetail() {
   const { product, reviews } = useProductStore();
@@ -63,6 +64,18 @@ function ProductDetail() {
       console.log(error);
     } finally {
       setLoading(true);
+    }
+  };
+
+  const deleteProduct = async () => {
+    const response = await deleteProducts(productData.id);
+    if (response.status == 200) {
+      toast({ description: "Product deleted successfully" });
+      navigate("/products");
+    } else {
+      toast({
+        description: "Error occured deleting the product, please try again",
+      });
     }
   };
 
@@ -122,7 +135,7 @@ function ProductDetail() {
           {
             productSize: choosenSize.size,
             color: productData.colorName,
-            // productId: productData.id,
+            product: productData.id,
             user: authenticatedUser.id,
           },
           {
@@ -194,6 +207,7 @@ function ProductDetail() {
                     ))}
                 </div>
               </div>
+              {console.log("productdata", productData)}
               <div className="right space-y-4 grow">
                 <UserProfile
                   src="/users/current_user.jpg"
@@ -207,7 +221,7 @@ function ProductDetail() {
                   <Rating text="42 reviews"></Rating>
                 </div>
                 <div className=" text-xl md:text-3xl font-semibold">
-                  {productData && productData.price && product.price}
+                  {productData && productData.price && productData.price}Birr
                 </div>
                 <div className="color-section">
                   <div className="color-description-heading font-semibold text-base flex justify-between flex-wrap">
@@ -298,9 +312,16 @@ function ProductDetail() {
                           size={size}
                           choosenSize={choosenSize}
                           onSizeToggle={setChoosenSize}
-                          // come back
                         ></SizeChoice>
                       ))}
+                    {!productData.sizeName && (
+                      <SizeChoice
+                        key={"sm"}
+                        size={{ id: 1, size: "sm" }}
+                        choosenSize={{ id: 1, size: "sm" }}
+                        onSizeToggle={setChoosenSize}
+                      ></SizeChoice>
+                    )}
                   </div>
                 </div>
                 <div className="add-btns flex gap-4 justify-between items-center">
@@ -345,6 +366,29 @@ function ProductDetail() {
                       </svg>
                     </span>
                   </Button>
+                  {/* ownerId == authenticatedUser.id */}
+                  {productData.ownerId == authenticatedUser.id && (
+                    <div className="flex gap-4">
+                      <Button
+                        onClick={() => {
+                          navigate(`/products/update/${productData.id}`);
+                        }}
+                        className="bg-[#E5D597] rounded-md p-5 hover:bg-[#E7D281] text-black"
+                      >
+                        <Edit></Edit>
+                      </Button>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          deleteProduct(product.id);
+                        }}
+                      >
+                        <Button className="bg-transparent rounded-md p-5 hover:bg-red-600 border-red-600 border hover:text-white text-red-600">
+                          <Trash></Trash>
+                        </Button>
+                      </form>
+                    </div>
+                  )}
                 </div>
                 <div className="font-semibold flex gap-2">
                   <span>

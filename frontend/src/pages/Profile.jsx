@@ -16,6 +16,15 @@ import { Upload } from "lucide-react";
 import { ACCESS_TOKEN } from "@/lib/constants";
 
 export default function Profile() {
+  const { userInfo } = useAuthStore();
+
+  useEffect(() => {
+    if (userInfo) {
+      setProfile(userInfo);
+      console.log("user info", userInfo);
+    }
+  }, [userInfo]);
+  const navigate = useNavigate();
   const { refreshToken } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
@@ -29,15 +38,6 @@ export default function Profile() {
 
   const { id } = useParams();
 
-  const navigate = useNavigate();
-  const {userInfo} = useAuthStore();
-
-  useEffect(() => {
-    if (userInfo) {
-      setProfile(userInfo);
-      console.log("user info", userInfo);
-    }
-  }, [userInfo]);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfile((prevProfile) => ({

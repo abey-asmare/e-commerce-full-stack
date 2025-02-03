@@ -1,5 +1,6 @@
 package com.ecommerce.backend.services;
 
+import com.ecommerce.backend.models.Product;
 import com.ecommerce.backend.models.ProductImage;
 import com.ecommerce.backend.repositories.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,12 @@ public class ImageService {
         return imageRepository.findByProductId(productId);
     }
 
+
     public boolean isPatternPresent(String pattern){
         return imageRepository.findByImageUrlContains(pattern);
     }
 
+    public void deleteAllByProduct(Product product){
+        imageRepository.deleteAllByProduct(product);
+    }
 }

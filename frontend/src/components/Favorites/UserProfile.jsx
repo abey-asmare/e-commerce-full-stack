@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PropTypes from "prop-types";
 import Rating from "./Rating";
-import { Badge } from "@/components/ui/badge"
-
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 function UserProfile({
   avatar_classname = "",
@@ -12,8 +12,10 @@ function UserProfile({
   type = "",
   rating = 1,
   className,
-  isOwner
+  isOwner,
+  userId,
 }) {
+  const navigate = useNavigate();
   const getInitials = (name) =>
     name
       .split(" ")
@@ -21,21 +23,36 @@ function UserProfile({
       .join("");
 
   return (
-    <div className={`user-profile  flex gap-2 ${className } ${type === "profile" ? "avatar" : ""}`}>
+    <div
+      className={`user-profile  flex gap-2 ${className} ${
+        type === "profile" ? "avatar" : ""
+      }`}
+    >
       <Avatar className={avatar_classname}>
         <AvatarImage src={src} />
-        <AvatarFallback className="font-medium">{getInitials(username)}</AvatarFallback>
+        <AvatarFallback className="font-medium">
+          {getInitials(username)}
+        </AvatarFallback>
       </Avatar>
       {type === "profile" ? null : (
         <div className="flex flex-col">
           <p className="username text-black font-semibold flex items-center gap-2.5">
-            {username} 
+            {username}
             {isOwner && (
-              <Badge variant="outlined" className={` cursor-pointer border-[#6C580C] text-[#6C580C] hover:border-[#E9DDAC]  rounded-full px-4 hover:bg-[#E9DDAC] hover:text-[#6C580C]`}>Edit</Badge>
-            )
-            }
+              <Badge
+                variant="outlined"
+                className={` cursor-pointer border-[#6C580C] text-[#6C580C] hover:border-[#E9DDAC]  rounded-full px-4 hover:bg-[#E9DDAC] hover:text-[#6C580C]`}
+                onClick={() => {
+                  navigate("/profile/" + userId);
+                }}
+              >
+                Edit
+              </Badge>
+            )}
             {type === "compact" && (
-              <span className="text-gray-400 font-medium text-sm">{activeStatus}</span>
+              <span className="text-gray-400 font-medium text-sm">
+                {activeStatus}
+              </span>
             )}
           </p>
           {type === "compact" ? (

@@ -14,23 +14,18 @@ import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN } from "@/lib/constants";
 
 function Navbar() {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [userInfo, setUserInfo] = useState({});
   const navigate = useNavigate();
+  const {
+    isAuthorized,
+    setIsAuthorized,
+    userInfo,
+    setUserInfo,
+    decodeUserInfo,
+  } = useAuthStore();
 
-  useEffect(() => {
-    const token = localStorage.getItem(ACCESS_TOKEN);
-    if (token) {
-      const decode = jwtDecode(token);
-      console.log("token", decode);
-      setUserInfo(decode);
-      setIsAuthorized(true);
-    } else {
-      setUserInfo({});
-      setIsAuthorized(false);
-    }
-  }, []);
-
+  useEffect(() => { 
+    decodeUserInfo();
+  }, [isAuthorized]);
   return (
     <div className="nav-bar flex flex-wrap justify-between pt-2 border-b pb-2 px-2 md:px-14 sticky top-0 bg-white z-10">
       <div className="left flex gap-3 sm:text-lg md:text-xl lg:text-2xl font-bold items-center">
@@ -211,8 +206,6 @@ function Navbar() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  setIsAuthorized(false);
-                  setUserInfo({});
                   navigate("/logout");
                 }}
                 className="flex items-center"

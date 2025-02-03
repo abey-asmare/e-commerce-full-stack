@@ -1,9 +1,17 @@
 import { SM_CARD_DELAYS } from "@/lib/constants";
 import { Skeleton } from "../ui/skeleton";
 import { useProductListingStore } from "@/store/ProductListingStore";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-export default function LargeProductCard({ product, skeleton = true }) {
+export default function LargeProductCard({
+  product,
+  skeleton = true,
+  showProduct,
+  setShowProduct,
+}) {
   const { loading } = useProductListingStore();
+  const navigate = useNavigate();
 
   return skeleton ? (
     <div className="product-img-lg-container my-2 w-[160px] lg:h-[520px] md:w-[200px] lg:w-[260px] max-w-[260px]">
@@ -36,20 +44,36 @@ export default function LargeProductCard({ product, skeleton = true }) {
     </div>
   ) : (
     <div
+      onClick={() => {
+        navigate(`/products/${product.id}`);
+      }}
       key={product.id}
-      className="product-img-lg-container my-2 w-[160px] lg:h-[520px] md:w-[200px] lg:w-[260px] max-w-[260px]"
+      className="cursor-pointer product-img-lg-container my-2 w-[160px] lg:h-[520px] md:w-[200px] lg:w-[260px] max-w-[260px]"
     >
       <div className=" product-lg products flex flex-col gap-2 group/heroItem">
         <div className="product-img overflow-hidden h-[160px] lg:h-[260px] max-h-full rounded-sm">
           <img
-            src={product.images[0].imageUrl}
-            className="w-full max-h-full h-full object-cover"
+            src={
+              product.id == showProduct.id
+                ? showProduct.src
+                : product.images[0].imageUrl
+            }
+            className={
+              "w-full max-h-full h-full object-cover transition-all delay-1000"
+            }
             alt="t-shrit images"
           />
         </div>
         <div className="product-sm-img-container gap-2 hidden lg:flex">
           {product.images.slice(0, 4).map((image, index) => (
             <div
+              onMouseEnter={() => {
+                setTimeout(() => {
+                  setShowProduct({ id: product.id, src: image.imageUrl });
+                  console.log(showProduct);
+                }, 200);
+              }}
+
               key={index}
               className={`product-sm-img rounded-sm overflow-hidden hidden group-hover/heroItem:inline-block product-xsm w-8 h-8 animate-opaquex ${SM_CARD_DELAYS[index]}`}
             >
@@ -76,11 +100,11 @@ export default function LargeProductCard({ product, skeleton = true }) {
               : product.price}
             Birr
             {product.discountedPercentage !== null &&
-            product.discountedPercentage !== 0 && (
-              <sup className="px-2 text-c_red-500 line-through">
-                ${product.price}Birr
-              </sup>
-            )}
+              product.discountedPercentage !== 0 && (
+                <sup className="px-2 text-c_red-500 line-through">
+                  ${product.price}Birr
+                </sup>
+              )}
           </p>
           {product.discountedPercentage !== null &&
             product.discountedPercentage !== 0 && (

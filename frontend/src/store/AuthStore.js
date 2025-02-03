@@ -14,8 +14,10 @@ export const useAuthStore = create((set, get) => ({
     if (accessToken) {
       const decode = jwtDecode(accessToken);
       get().setUserInfo(decode);
+      get().setIsAuthorized(true);
+    } else {
+      get().setIsAuthorized(false);
     }
-    return null;
   },
 
   refreshToken: async () => {
@@ -33,6 +35,7 @@ export const useAuthStore = create((set, get) => ({
       if (response.status === 200) {
         const newAccessToken = response.data.accessToken;
         localStorage.setItem(ACCESS_TOKEN, newAccessToken);
+        console.log("refreshed");
       }
     } catch (error) {
       console.log("Refresh token request failed:", error);

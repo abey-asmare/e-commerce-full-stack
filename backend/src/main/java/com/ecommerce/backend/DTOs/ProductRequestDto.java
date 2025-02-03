@@ -21,9 +21,15 @@ public class ProductRequestDto {
     @NotBlank(message = "Color name is required")
     private String colorName;
 
+    private Integer discountPercentage;
+
+
     @NotNull(message = "price is required")
     @Min(0)
     private Double price;
+
+    @NotNull(message = "price is required")
+    private Long owner;
 
     @NotBlank(message = "Product type is required")
     private String productTypeName;

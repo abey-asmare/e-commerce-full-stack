@@ -17,10 +17,13 @@ public class ProductDetailResponseDto {
     private Integer availableQuantity;
     private String label;
     private String owner;
+    private Long ownerId;
     private String colorName;
     private String productTypeName;
     private List<ProductSize> sizeName;
     private List<ProductImageResponseDto> images;
     private Set<RelatedProductResponseDto> relatedProducts;
     private List<CommentResponseDto> comments;
+    private Double price;
+    private String gender;
 }

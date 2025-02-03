@@ -6,7 +6,8 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/lib/constants";
 import api from "@/lib/api";
 import { meta } from "@eslint/js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/AuthStore";
 
 export function LoginForm({ className, ...props }) {
   const [email, setEmail] = useState("");
@@ -14,6 +15,14 @@ export function LoginForm({ className, ...props }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const {
+    isAuthorized,
+    setIsAuthorized,
+    userInfo,
+    setUserInfo,
+    decodeUserInfo,
+  } = useAuthStore();
 
   const handleSubmit = async (e) => {
     localStorage.clear();
@@ -26,6 +35,8 @@ export function LoginForm({ className, ...props }) {
       });
       localStorage.setItem(ACCESS_TOKEN, response.data.accessToken);
       localStorage.setItem(REFRESH_TOKEN, response.data.refreshToken);
+      decodeUserInfo();
+
       navigate("/");
     } catch (err) {
       setError(err.message);

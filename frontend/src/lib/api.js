@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ACCESS_TOKEN } from "./constants";
+import { toast } from "@/hooks/use-toast";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -67,6 +68,22 @@ export async function getProducts(
           resolve(response.data);
         }, 2000);
       });
+    })
+    .catch((err) => {
+      console.log(err);
+      throw err;
+    });
+}
+
+export async function deleteProducts(productId) {
+  return await api
+    .delete(`/products/${productId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+      },
+    })
+    .then((response) => {
+      return { status: response.status, data: response.data };
     })
     .catch((err) => {
       console.log(err);

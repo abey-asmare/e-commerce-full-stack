@@ -1,5 +1,12 @@
+
 function LoginRegister() {
-  return <div>welcome backgroundColor</div>;
+  return (
+    <div>
+
+      hello protected page
+      
+    </div>
+  )
 }
 
-export default LoginRegister;
+export default LoginRegister
